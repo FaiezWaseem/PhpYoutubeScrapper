@@ -9,6 +9,14 @@ class YT
 
     protected $search_query = 'results?search_query=';
 
+    protected $channel = 'channel/';
+
+    protected $FEATURED = 0;
+    protected $VIDEOS = 1;
+    protected $SHORTS = 2;
+    protected $PLAYLIST = 3;
+
+
     public function HomePageVideos()
     {
         $html = $this->get($this->base_url);
@@ -27,13 +35,56 @@ class YT
         $json = $this->getInitalData($html, 43);
         return $this->parserelatedVideoResult($json);
     }
+    public function getChannelFeatured($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId);
+        $json = $this->getInitalData($html, 34);
+        return $this->getParseChannelVideos($json, $this->FEATURED);
+        // return $json;
+    }
+    public function getChannelVideos($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/videos');
+        $json = $this->getInitalData($html, 34);
+        return $this->getParseChannelVideos($json, $this->VIDEOS);
+    }
+    public function getChannelShorts($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/shorts');
+        $json = $this->getInitalData($html, 34);
+        return $this->getParseChannelVideos($json, $this->SHORTS);
+        // return $json;
+    }
+    public function getChannelPlayList($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
+        $json = $this->getInitalData($html, 34);
+        return $json;
+        // return $this->getParseChannelVideos($json, $this->PLAYLIST);
+    }
+    public function getChannelMetaDetails($channelId){
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
+        $json = $this->getInitalData($html, 34);
+        return array(
+            'title' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.title' , ''),
+            'avatar' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.avatar.thumbnails' , []),
+            'banner' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.banner.thumbnails' , []),
+            'mobileBanner' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.mobileBanner.thumbnails' , []),
+            'videosCount' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.videosCountText.runs.0.text' , ''),
+            'tagline' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.tagline.channelTaglineRenderer.content' , ''),
+            'description' => $this->arrayGet($json , 'metadata.channelMetadataRenderer.description' , ''),
+        );
+    }
 
     public function getVideo($videoId)
     {
         $html = $this->get($this->base_url . $this->video_url . $videoId);
         $json = $this->getPlayerResponse($html);
         $json2 = $this->getInitalData($html, 43);
-        return array( 'video' => $this->parseVideo($json) , 'recomended' => $this->parserelatedVideoResult($json2));
+        $subs = $json2["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][1]["videoSecondaryInfoRenderer"]["owner"]["videoOwnerRenderer"]["subscriberCountText"]["simpleText"];
+        $video = $this->parseVideo($json);
+        $video["subscriber"] = $subs;
+        return array('video' => $video, 'recomended' => $this->parserelatedVideoResult($json2));
     }
 
     // $nodeIndex is the Script tag Dom tree Array index
@@ -75,6 +126,98 @@ class YT
         return $output;
     }
 
+    protected function getParseChannelVideos($json, $index)
+    {
+        $_res = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][$index]["tabRenderer"];
+        if ($_res["content"]) {
+            switch ($index) {
+                case $this->FEATURED:
+                    $_videos = $_res["content"]["sectionListRenderer"]["contents"];
+                    return $this->getParsedChannelFeatures($_videos);
+                case $this->VIDEOS:
+                    $_videos = $_res["content"]["richGridRenderer"]["contents"];
+                    return $this->getParsedChannelVideos($_videos);
+                case $this->SHORTS:
+                    $_videos = $_res["content"]["richGridRenderer"]["contents"];
+                    return $this->getParsedChannelShorts($_videos);
+                case $this->PLAYLIST:
+                    $_videos = $_res["content"]["sectionListRenderer"]["contents"];
+                    return $this->getParsedChannelPlaylist($_videos);
+            }
+
+        }
+        return [];
+    }
+    protected function getParsedChannelPlaylist($_videos)
+    {
+        $_videos = $_videos[0]["itemSectionRenderer"]["contents"][0]["gridRenderer"]["items"];
+        $videos = array();
+        foreach ($_videos as $key => $value) {
+            $_temp = $this->arrayGet($value, "gridPlaylistRenderer", []);
+            array_push(
+                $videos,
+                array(
+                    "playlistId" => $this->arrayGet($_temp, "playlistId", ''),
+                    "thumbnails" => $this->arrayGet($_temp, "thumbnail.thumbnails", []),
+                    "title" => $this->arrayGet($_temp, "title.runs.0.text", ''),
+                    "videoId" => $this->arrayGet($_temp, "title.runs.0.watchEndpoint.videoId", ''),
+                    "video_count" => $this->arrayGet($_temp, "videoCountText.runs.0.text", ''),
+                )
+            );
+        }
+        return $videos;
+    }
+    protected function getParsedChannelShorts($_videos)
+    {
+        $videos = array();
+        foreach ($_videos as $key => $value) {
+            $_temp = $this->arrayGet($value, "richItemRenderer.content.reelItemRenderer", []);
+            array_push(
+                $videos,
+                array(
+                    "videoId" => $this->arrayGet($_temp, "videoId", ''),
+                    "thumbnails" => $this->arrayGet($_temp, "thumbnail.thumbnails", []),
+                    "title" => $this->arrayGet($_temp, "headline.simpleText", ''),
+                    "viewCount" => $this->arrayGet($_temp, "viewCountText.simpleText", ''),
+                )
+            );
+        }
+        return $videos;
+    }
+    protected function getParsedChannelVideos($_videos)
+    {
+        $videos = array();
+        foreach ($_videos as $key => $value) {
+            $_temp = $this->arrayGet($value, "richItemRenderer.content.videoRenderer", []);
+            array_push(
+                $videos,
+                array(
+                    "videoId" => $this->arrayGet($_temp, "videoId", ''),
+                    "thumbnails" => $this->arrayGet($_temp, "thumbnail.thumbnails", []),
+                    "title" => $this->arrayGet($_temp, "title.runs.0.text", ''),
+                    "viewCount" => $this->arrayGet($_temp, "viewCountText.simpleText", ''),
+                    "lengthText" => $this->arrayGet($_temp, "lengthText.simpleText", ''),
+                )
+            );
+        }
+        return $videos;
+    }
+    protected function getParsedChannelFeatures($_videos)
+    {
+        $videos = array();
+        foreach ($_videos as $key => $value) {
+            $_temp = $this->arrayGet($value, "itemSectionRenderer.contents.0.shelfRenderer", []);
+            array_push(
+                $videos,
+                array(
+                    "title" => $this->arrayGet($_temp, "title.runs.0.text", ''),
+                    "content" => $this->arrayGet($_temp, "content.horizontalListRenderer.items", []),
+                )
+            );
+        }
+        return $videos;
+    }
+
     protected function parseVideo($json)
     {
         $data = array(
@@ -103,7 +246,7 @@ class YT
                 $_video = $this->arrayGet($value, 'richItemRenderer.content.videoRenderer');
                 $video['videoId'] = $this->arrayGet($_video, 'videoId', '');
                 $video['viewCount'] = $this->arrayGet($_video, 'viewCountText.simpleText', '');
-                $video['title'] = $_video["title"]["runs"][0]["text"]; 
+                $video['title'] = $_video["title"]["runs"][0]["text"];
                 $video['thumbnails'] = $this->arrayGet($_video, 'thumbnail.thumbnails', []);
                 $video['description'] = $this->isExits("descriptionSnippet", $_video, $_video["descriptionSnippet"]["runs"][0]["text"]);
                 $video['channelName'] = $_video["longBylineText"]["runs"][0]["text"];
