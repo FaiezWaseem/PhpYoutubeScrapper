@@ -18,7 +18,7 @@ class YT
      * Some Channels has Stream Tab so need to Change
      * Playlist index to 4 in that case
      */
-    protected $PLAYLIST = 3; 
+    protected $PLAYLIST = 3;
 
 
     public function HomePageVideos()
@@ -59,31 +59,36 @@ class YT
         return $this->getParseChannelVideos($json, $this->SHORTS);
         // return $json;
     }
-    public function getChannelPlayList($channelId)
+    /*
+    pass the channelId as String 
+    get an Array of Videos Object
+    */
+    public function getChannelPlayList(string $channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
         $json = $this->getInitalData($html, 34);
         return $this->getParseChannelVideos($json, $this->PLAYLIST);
         // return $json;
     }
-    public function getChannelMetaDetails($channelId){
+    public function getChannelMetaDetails($channelId)
+    {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
         $json = $this->getInitalData($html, 34);
         return array(
-            'title' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.title' , ''),
-            'avatar' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.avatar.thumbnails' , []),
-            'banner' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.banner.thumbnails' , []),
-            'mobileBanner' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.mobileBanner.thumbnails' , []),
-            'videosCount' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.videosCountText.runs.0.text' , ''),
-            'tagline' => $this->arrayGet($json , 'header.c4TabbedHeaderRenderer.tagline.channelTaglineRenderer.content' , ''),
-            'description' => $this->arrayGet($json , 'metadata.channelMetadataRenderer.description' , ''),
+            'title' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.title', ''),
+            'avatar' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.avatar.thumbnails', []),
+            'banner' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.banner.thumbnails', []),
+            'mobileBanner' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.mobileBanner.thumbnails', []),
+            'videosCount' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.videosCountText.runs.0.text', ''),
+            'tagline' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.tagline.channelTaglineRenderer.content', ''),
+            'description' => $this->arrayGet($json, 'metadata.channelMetadataRenderer.description', ''),
         );
     }
 
     /*
-      Get video Information & Related Videos
-      VideoInfo gives title desc thumbnail downloadurl etc
-      Related videos gives an Array 
+    Get video Information & Related Videos
+    VideoInfo gives title desc thumbnail downloadurl etc
+    Related videos gives an Array 
     */
     public function getVideo($videoId)
     {
@@ -93,7 +98,131 @@ class YT
         $subs = $json2["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"][1]["videoSecondaryInfoRenderer"]["owner"]["videoOwnerRenderer"]["subscriberCountText"]["simpleText"];
         $video = $this->parseVideo($json);
         $video["subscriber"] = $subs;
-        return array('video' => $video, 'recomended' => $this->parserelatedVideoResult($json2));
+        return array(
+            'video' => $video,
+            'recomended' => $this->parserelatedVideoResult($json2),
+            'comment' => $this->getVideoCommentInfo($json2)
+        );
+    }
+
+    public function getComments(string $nextToken)
+    {
+        $json = $this->postNext($nextToken);
+        // return $json;
+        return $this->getParsedComments($json);
+    }
+    public function getReplyComments(string $nextToken)
+    {
+        $json = $this->postNext($nextToken);
+        return $this->getParsedReplyComments($json);
+
+    }
+    protected function postNext(string $nextToken)
+    {
+        $curl = curl_init();
+
+        curl_setopt_array($curl, [
+            CURLOPT_URL => "https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => "",
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => "POST",
+            CURLOPT_POSTFIELDS => "{\r\n  \"context\": {\r\n    \"client\": {\r\n      \"hl\": \"en-GB\",\r\n      \"gl\": \"PK\",\r\n      \"deviceMake\": \"Google\",\r\n      \"deviceModel\": \"Nexus 5\",\r\n      \"visitorData\": \"CgtmZXN5X0VMZGwwSSiE1qWkBg%3D%3D\",\r\n      \"userAgent\": \"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36,gzip(gfe)\",\r\n      \"clientName\": \"MWEB\",\r\n      \"clientVersion\": \"2.20230607.06.00\",\r\n      \"osName\": \"Android\",\r\n      \"osVersion\": \"6.0\",\r\n      \"playerType\": \"UNIPLAYER\",\r\n      \"screenPixelDensity\": 2,\r\n      \"platform\": \"MOBILE\",\r\n      \"clientFormFactor\": \"SMALL_FORM_FACTOR\",\r\n      \"screenDensityFloat\": 2,\r\n      \"browserName\": \"Chrome Mobile\",\r\n      \"browserVersion\": \"109.0.0.0\",\r\n      \"acceptHeader\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8\",\r\n      \"deviceExperimentId\": \"ChxOekU0T0RnMU9EazBORGt5TlRrMk1qTTFNQT09EITWpaQGGJ_qj54G\",\r\n      \"screenWidthPoints\": 564,\r\n      \"screenHeightPoints\": 962,\r\n      \"utcOffsetMinutes\": 300,\r\n      \"userInterfaceTheme\": \"USER_INTERFACE_THEME_LIGHT\",\r\n      \"memoryTotalKbytes\": \"4000000\",\r\n      \"mainAppWebInfo\": {\r\n        \"webDisplayMode\": \"WEB_DISPLAY_MODE_BROWSER\",\r\n        \"isWebNativeShareAvailable\": false\r\n      }\r\n    }\r\n  },\r\n  \"continuation\": \"$nextToken\"\r\n}",
+            CURLOPT_HTTPHEADER => [
+                "Accept: */*",
+                "Content-Type: application/json",
+                "User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36"
+            ],
+        ]);
+
+        $response = curl_exec($curl);
+        $err = curl_error($curl);
+
+        curl_close($curl);
+
+        if ($err) {
+            return "cURL Error #:" . $err;
+        } else {
+            return json_decode($response);
+        }
+    }
+
+    protected function getParsedReplyComments($json)
+    {
+        $comments = $json->onResponseReceivedEndpoints[0]->appendContinuationItemsAction->continuationItems;
+        $commentsSize = sizeof($comments) - 2;
+        $comments_parsed = array();
+        for ($i = 0; $i < $commentsSize; $i++) {
+            $comment = $comments[$i]->commentRenderer;
+            array_push(
+                $comments_parsed,
+                array(
+                    'Author' => $comment->authorText->runs[0]->text,
+                    'AuthorThumbnail' => $comment->authorThumbnail->thumbnails,
+                    'AuthorChannelId' => $comment->authorEndpoint->browseEndpoint->browseId,
+                    'message' => $comment->contentText->runs,
+                    'publishedAt' => $comment->publishedTimeText->runs[0]->text,
+                    'commentId' => $comment->commentId,
+                    'likes' => $comment->voteCount->runs[0]->text ?? 0,
+                )
+            );
+        }
+        return array(
+            'comments' => $comments_parsed,
+            'nextToken' => $comments[sizeof($comments) - 1]->continuationItemRenderer->button->buttonRenderer->command->continuationCommand->token ?? null
+        );
+    }
+    protected function getParsedComments($json)
+    {
+        if (sizeof($json->onResponseReceivedEndpoints) == 1) {
+            $comments = $json->onResponseReceivedEndpoints[0]->appendContinuationItemsAction->continuationItems;
+        } else {
+            $comments = $json->onResponseReceivedEndpoints[1]->reloadContinuationItemsCommand->continuationItems;
+        }
+        $commentsSize = sizeof($comments) - 2;
+        $comments_parsed = array();
+        for ($i = 0; $i < $commentsSize; $i++) {
+            $comment = $comments[$i]->commentThreadRenderer;
+            array_push(
+                $comments_parsed,
+                array(
+                    'Author' => $comment->comment->commentRenderer->authorText->runs[0]->text,
+                    'AuthorThumbnail' => $comment->comment->commentRenderer->authorThumbnail->thumbnails,
+                    'AuthorChannelId' => $comment->comment->commentRenderer->authorEndpoint->browseEndpoint->browseId,
+                    'message' => $comment->comment->commentRenderer->contentText->runs,
+                    'publishedAt' => $comment->comment->commentRenderer->publishedTimeText->runs[0]->text,
+                    'commentId' => $comment->comment->commentRenderer->commentId,
+                    'replyCount' => $comment->comment->commentRenderer->replyCount ?? 0,
+                    'likes' => $comment->comment->commentRenderer->voteCount->runs[0]->text ?? 0,
+                    'nextReplyToken' => $comment->replies->commentRepliesRenderer->contents[0]->continuationItemRenderer->button->buttonRenderer->command->continuationCommand->token ?? null,
+                )
+            );
+        }
+        return array(
+            'comments' => $comments_parsed,
+            'nextToken' => $comments[sizeof($comments) - 1]->continuationItemRenderer->continuationEndpoint->continuationCommand->token ?? null
+        );
+    }
+    protected function getVideoCommentInfo($json)
+    {
+        $video_page_response = $json["contents"]["twoColumnWatchNextResults"]["results"]["results"]["contents"];
+        $size = sizeof($video_page_response);
+        $top_comment = $video_page_response[$size - 2]["itemSectionRenderer"]["contents"][0]["commentsEntryPointHeaderRenderer"];
+        $featured_comment = array(
+            'Author' => $top_comment["contentRenderer"]["commentsEntryPointTeaserRenderer"]["teaserAvatar"]["accessibility"]["accessibilityData"]["label"],
+            'thumbnails' => $top_comment["contentRenderer"]["commentsEntryPointTeaserRenderer"]["teaserAvatar"]["thumbnails"],
+            'comment' => $top_comment["contentRenderer"]["commentsEntryPointTeaserRenderer"]["teaserContent"]["simpleText"],
+        );
+        $nextToken = $video_page_response[$size - 1]["itemSectionRenderer"]["contents"][0]["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
+
+        return (
+            array(
+                'top_comment' => $featured_comment,
+                'nextToken' => $nextToken
+            )
+        );
     }
 
     // $nodeIndex is the Script tag Dom tree Array index
