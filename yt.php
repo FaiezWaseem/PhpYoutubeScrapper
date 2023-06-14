@@ -14,7 +14,11 @@ class YT
     protected $FEATURED = 0;
     protected $VIDEOS = 1;
     protected $SHORTS = 2;
-    protected $PLAYLIST = 3;
+    /**
+     * Some Channels has Stream Tab so need to Change
+     * Playlist index to 4 in that case
+     */
+    protected $PLAYLIST = 3; 
 
 
     public function HomePageVideos()
@@ -59,8 +63,8 @@ class YT
     {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
         $json = $this->getInitalData($html, 34);
-        return $json;
-        // return $this->getParseChannelVideos($json, $this->PLAYLIST);
+        return $this->getParseChannelVideos($json, $this->PLAYLIST);
+        // return $json;
     }
     public function getChannelMetaDetails($channelId){
         $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
@@ -76,6 +80,11 @@ class YT
         );
     }
 
+    /*
+      Get video Information & Related Videos
+      VideoInfo gives title desc thumbnail downloadurl etc
+      Related videos gives an Array 
+    */
     public function getVideo($videoId)
     {
         $html = $this->get($this->base_url . $this->video_url . $videoId);
@@ -92,10 +101,12 @@ class YT
     // 33 for Search Page , 34 for Home Page , 43 for Video Watch 
     protected function getInitalData($html, $nodeIndex = 33)
     {
+        // If our regex found the initialData then return 
         if (preg_match('/ytInitialData\s*=\s*({.+?})\s*;/i', $html, $matches)) {
             $json = $matches[1];
             return json_decode($json, true);
         }
+        // Else  we will load it in dom and get through index
         $doc = new DOMDocument();
         @$doc->loadHTML($html);
         $nodes = $doc->getElementsByTagName('script');
@@ -160,7 +171,7 @@ class YT
                     "playlistId" => $this->arrayGet($_temp, "playlistId", ''),
                     "thumbnails" => $this->arrayGet($_temp, "thumbnail.thumbnails", []),
                     "title" => $this->arrayGet($_temp, "title.runs.0.text", ''),
-                    "videoId" => $this->arrayGet($_temp, "title.runs.0.watchEndpoint.videoId", ''),
+                    "videoId" => $this->arrayGet($_temp, "title.runs.0.navigationEndpoint.watchEndpoint.videoId", ''),
                     "video_count" => $this->arrayGet($_temp, "videoCountText.runs.0.text", ''),
                 )
             );
