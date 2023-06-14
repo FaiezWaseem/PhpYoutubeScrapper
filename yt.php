@@ -117,12 +117,52 @@ class YT
         return $this->getParsedReplyComments($json);
 
     }
-    protected function postNext(string $nextToken)
+    /*
+      @params $nextToken 
+      you obtain nextToken from search function 
+      when you search something u will recive a
+      nextSearchToken pass that here it load more 
+      results and generate a new nextSearch Token
+    */
+    public function getSearchNext($nextToken)
+    {
+        $json = $this->postNext($nextToken, 'search');
+        return $this->getParsedSearchResult($json);
+    }
+    protected function getParsedSearchResult($json)
+    {
+        $root = $json->onResponseReceivedCommands[0]->appendContinuationItemsAction->continuationItems;
+        $videos = $root[0]->itemSectionRenderer->contents;
+        $VideosSize = sizeof($videos) - 2;
+        $videos_parsed = array();
+        for ($i = 0; $i < $VideosSize; $i++) {
+            $video = $videos[$i]->videoWithContextRenderer ?? null;
+            if ($video) {
+                array_push(
+                    $videos_parsed,
+                    array(
+                        'videoId' => $video->videoId,
+                        'thumbnails' => $video->thumbnail->thumbnails,
+                        'title' => $video->headline->runs[0]->text ?? '',
+                        'viewCount' => $video->shortViewCountText->runs[0]->text,
+                        'publishedAt' => $video->publishedTimeText->runs[0]->text,
+                        'channelName' => $video->shortBylineText->runs[0]->text,
+                        'channelThumbnail' => $video->channelThumbnail->channelThumbnailWithLinkRenderer->thumbnail->thumbnails ?? [],
+                    )
+                );
+            }
+        }
+        return array(
+            'videos' => $videos_parsed,
+            'nextToken' => $root[sizeof($root) - 1]->continuationItemRenderer->continuationEndpoint->continuationCommand->token ?? null
+        );
+    }
+    protected function postNext(string $nextToken, $param = 'next')
     {
         $curl = curl_init();
 
         curl_setopt_array($curl, [
-            CURLOPT_URL => "https://www.youtube.com/youtubei/v1/next?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false",
+            CURLOPT_URL => "https://www.youtube.com/youtubei/v1/$param?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false",
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
@@ -399,6 +439,10 @@ class YT
 
     protected function parseSearchResult($json)
     {
+        $video_page_response = $json["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"];
+        $size = sizeof($video_page_response);
+        $nextToken = $video_page_response[$size - 1]["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
+        
         $videosJson = $json["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"];
         $videos = [];
         foreach ($videosJson as $value) {
@@ -423,7 +467,10 @@ class YT
                 array_push($videos, $video);
             }
         }
-        return $videos;
+        return array(
+            'videos' => $videos,
+            'nextSearchToken' => $nextToken
+        );
     }
 
     protected function parserelatedVideoResult($json)

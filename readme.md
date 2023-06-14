@@ -4,7 +4,7 @@
  - GET HomePage Videos
  - GET Video Info + Video Related Recomended Videos
  - GET Video Playable links
- - GET Search Video
+ - GET Search Video + load more videos
  - GET Channel Meta Info
  - GET Channel Featured , Videos , Shorts & Playlist
  - GET Video Comments
@@ -13,6 +13,7 @@
 
 ## how to
  just download the yt.php , include it and enjoy!
+ for example checkout index.php
 
 ```
     include_once("./yt.php");
