@@ -118,11 +118,11 @@ class YT
 
     }
     /*
-      @params $nextToken 
-      you obtain nextToken from search function 
-      when you search something u will recive a
-      nextSearchToken pass that here it load more 
-      results and generate a new nextSearch Token
+    @params $nextToken 
+    you obtain nextToken from search function 
+    when you search something u will recive a
+    nextSearchToken pass that here it load more 
+    results and generate a new nextSearch Token
     */
     public function getSearchNext($nextToken)
     {
@@ -147,7 +147,7 @@ class YT
                         'viewCount' => $video->shortViewCountText->runs[0]->text,
                         'publishedAt' => $video->publishedTimeText->runs[0]->text,
                         'channelName' => $video->shortBylineText->runs[0]->text,
-                        'channelThumbnail' => $video->channelThumbnail->channelThumbnailWithLinkRenderer->thumbnail->thumbnails ?? [],
+                        'channelThumbnail' => $video->channelThumbnail->channelThumbnailWithLinkRenderer->thumbnail->thumbnails[0]->url ?? [],
                     )
                 );
             }
@@ -308,25 +308,29 @@ class YT
 
     protected function getParseChannelVideos($json, $index)
     {
-        $_res = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][$index]["tabRenderer"];
-        if ($_res["content"]) {
+        $_res = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][$index]["tabRenderer"]["content"] ?? null;
+        if ($_res) {
             switch ($index) {
                 case $this->FEATURED:
-                    $_videos = $_res["content"]["sectionListRenderer"]["contents"];
+                    $_videos = $_res["sectionListRenderer"]["contents"];
                     return $this->getParsedChannelFeatures($_videos);
                 case $this->VIDEOS:
-                    $_videos = $_res["content"]["richGridRenderer"]["contents"];
+                    $_videos = $_res["richGridRenderer"]["contents"];
                     return $this->getParsedChannelVideos($_videos);
                 case $this->SHORTS:
-                    $_videos = $_res["content"]["richGridRenderer"]["contents"];
+                    $_videos = $_res["richGridRenderer"]["contents"];
                     return $this->getParsedChannelShorts($_videos);
                 case $this->PLAYLIST:
-                    $_videos = $_res["content"]["sectionListRenderer"]["contents"];
+                    $_videos = $_res["sectionListRenderer"]["contents"];
                     return $this->getParsedChannelPlaylist($_videos);
+                default:
+                    return [];
             }
 
+        } else {
+            $this->PLAYLIST = $index + 1;
+            return $this->getParseChannelVideos($json, $index + 1);
         }
-        return [];
     }
     protected function getParsedChannelPlaylist($_videos)
     {
@@ -338,7 +342,7 @@ class YT
                 $videos,
                 array(
                     "playlistId" => $this->arrayGet($_temp, "playlistId", ''),
-                    "thumbnails" => $this->arrayGet($_temp, "thumbnail.thumbnails", []),
+                    "thumbnails" => $this->arrayGet($_temp, "thumbnail.thumbnails.0.url", []),
                     "title" => $this->arrayGet($_temp, "title.runs.0.text", ''),
                     "videoId" => $this->arrayGet($_temp, "title.runs.0.navigationEndpoint.watchEndpoint.videoId", ''),
                     "video_count" => $this->arrayGet($_temp, "videoCountText.runs.0.text", ''),
@@ -442,7 +446,7 @@ class YT
         $video_page_response = $json["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"];
         $size = sizeof($video_page_response);
         $nextToken = $video_page_response[$size - 1]["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
-        
+
         $videosJson = $json["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"];
         $videos = [];
         foreach ($videosJson as $value) {
