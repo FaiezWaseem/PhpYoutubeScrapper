@@ -129,6 +129,16 @@ class YT
         $json = $this->postNext($nextToken, 'search');
         return $this->getParsedSearchResult($json);
     }
+
+
+    public function getSearchSuggestions($query)
+    {
+        $search_url = "https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&hl=en-gb&gl=pk&sugexp=uqap13niqtn222%2Cytpo.bo.me%3D1%2Cytposo.bo.me%3D1%2Cytpo.bo.ro.mi%3D24381100%2Cytposo.bo.ro.mi%3D24381100%2Ccfro%3D1%2Cytpo.bo.me%3D0%2Cytposo.bo.me%3D0%2Cytpo.bo.ro.mi%3D24372967%2Cytposo.bo.ro.mi%3D24372967&gs_rn=64&gs_ri=youtube&authuser=1&tok=jyC9ATTibQdWkrbg_vfP4Q&ds=yt&cp=4&gs_id=m&q=$query&callback=google.sbox.p50&gs_gbg=ab4h6fv1Rwx36vY6ocxqP6";
+        $response = $this->get($search_url);
+        return $response;
+    }
+
+
     protected function getParsedSearchResult($json)
     {
         $root = $json->onResponseReceivedCommands[0]->appendContinuationItemsAction->continuationItems;
@@ -157,6 +167,7 @@ class YT
             'nextToken' => $root[sizeof($root) - 1]->continuationItemRenderer->continuationEndpoint->continuationCommand->token ?? null
         );
     }
+    // Works for loading more Comments and Also for loading more search results
     protected function postNext(string $nextToken, $param = 'next')
     {
         $curl = curl_init();
