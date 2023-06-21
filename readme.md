@@ -34,9 +34,8 @@
     echo json_encode($youtube->getChannelMetaDetails('UC8aFE06Cti9OnQcKpl6rDvQ'));
 
     // commentToken is Obtained from getVideo function
-    // echo json_encode($youtube->getComments('Eg0SC0dsTFJZbWw4bUNZGAYyJSIRIgtHbExSWW1sOG1DWTAAeAJCEGNvbW1lbnRzLXNlY3Rpb24%3D'));
-
-    // echo json_encode($youtube->getReplyComments('Eg0SC0dsTFJZbWw4bUNZGAYygwEaUBIaVWd4WlJRVWtVNjI3YlBwYlZleDRBYUFCQWciAggAKhhVQ2VWTW5TU2hQX0l2aXdra250ODNjd3cyC0dsTFJZbWw4bUNZQAFICoIBAggBQi9jb21tZW50LXJlcGxpZXMtaXRlbS1VZ3haUlFVa1U2MjdiUHBiVmV4NEFhQUJBZw%3D%3D'));
+    // echo json_encode($youtube->getComments(Comment_token_here));
+    // echo json_encode($youtube->getReplyComments(Reply_Comment_Token_Here));
 
 
 ```
@@ -44,7 +43,6 @@
 
 
 ### Todo
- - get search suggestion
- - load more videos [for all functions like homepagevideos , relatedvideos etc]
+ - load more videos [for all functions like homepagevideos , relatedvideos]
  - video playable link speed increase
 

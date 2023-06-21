@@ -1,5 +1,16 @@
 <?php
 
+/********************************************************************
+NOTE
+Started this project just for testing and fun i dont recommend 
+using it , The script works fine as of now June 21 2023
+Some stuff like video playable url dont work after a time 
+if send too many requests.
+
+I know code is dirty sorry for that is hard to read even i dont
+understand it after a week or two but atleast its working, thats 
+all matters to me :> 
+*********************************************************************/
 class YT
 {
 
@@ -13,6 +24,18 @@ class YT
 
     protected $FEATURED = 0;
     protected $VIDEOS = 1;
+    /**
+     * Some Channels Dont have shorts 
+     * so this wont work in that case
+     * and then playlist also wont show 
+     * because the we messed up with 
+     * array index you know so playlist  
+     * would be index 2 not 3 but if   
+     * channel do live streams than    
+     * playlist index becomes 3 again    
+     * so its all confusion so leaving    
+     * it to 2 , so it works in some cases    
+     */
     protected $SHORTS = 2;
     /**
      * Some Channels has Stream Tab so need to Change
@@ -20,25 +43,48 @@ class YT
      */
     protected $PLAYLIST = 3;
 
-
+     /*
+       GET THE VIDEO ARRAY OF YT HOMEPAGE
+       THE RESULT DEPENDS ON SERVER LOCATION
+       IF IN AMERICA RETURN YT AMERICA TRENDING VIDEOS
+     */
     public function HomePageVideos()
     {
         $html = $this->get($this->base_url);
         $json = $this->getInitalData($html, 34);
         return $this->parseHomePageVideos($json);
     }
+    /*
+      RETURNS A RESULT OF VIDEO ARRAY 
+      ON QUERY 
+      $query can be Php+Tutorial
+      no space '+' sign instead of space
+      * @param string $query
+      * @return array
+
+    */
     public function search($query)
     {
         $html = $this->get($this->base_url . $this->search_query . $query);
         $json = $this->getInitalData($html, 33);
         return $this->parseSearchResult($json);
     }
+    /*
+     pass a video Id it will return its related
+     videos Array
+     @param string $videoId
+     @return array
+    */
     public function getRelatedVideo($videoId)
     {
         $html = $this->get($this->base_url . $this->video_url . $videoId);
         $json = $this->getInitalData($html, 43);
         return $this->parserelatedVideoResult($json);
     }
+    /*
+    pass the channelId as String 
+    get an Array of Videos Object
+    */
     public function getChannelFeatured($channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId);
@@ -46,12 +92,20 @@ class YT
         return $this->getParseChannelVideos($json, $this->FEATURED);
         // return $json;
     }
+    /*
+    pass the channelId as String 
+    get an Array of Videos Object
+    */
     public function getChannelVideos($channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/videos');
         $json = $this->getInitalData($html, 34);
         return $this->getParseChannelVideos($json, $this->VIDEOS);
     }
+    /*
+    pass the channelId as String 
+    get an Array of Videos 
+    */
     public function getChannelShorts($channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/shorts');
@@ -61,7 +115,7 @@ class YT
     }
     /*
     pass the channelId as String 
-    get an Array of Videos Object
+    get an Array of Videos 
     */
     public function getChannelPlayList(string $channelId)
     {
@@ -70,6 +124,10 @@ class YT
         return $this->getParseChannelVideos($json, $this->PLAYLIST);
         // return $json;
     }
+    /*
+    pass the channelId as String 
+    get an Array Object(title,avatar,banner,mobileBanner,videosCount,tagline,description)
+    */
     public function getChannelMetaDetails($channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
@@ -86,7 +144,9 @@ class YT
     }
 
     /*
-    Get video Information & Related Videos
+    Get video detail ,  Related Videos , Top Comment and comment Token
+    Comment Token is used to load more comments can be used
+    with getComments method.
     VideoInfo gives title desc thumbnail downloadurl etc
     Related videos gives an Array 
     */
@@ -104,13 +164,17 @@ class YT
             'comment' => $this->getVideoCommentInfo($json2)
         );
     }
-
+     /*
+     pass the commentToken obtained from getVideo method or obtained 
+     from last loaded comments
+     */
     public function getComments(string $nextToken)
     {
         $json = $this->postNext($nextToken);
         // return $json;
         return $this->getParsedComments($json);
     }
+    
     public function getReplyComments(string $nextToken)
     {
         $json = $this->postNext($nextToken);
