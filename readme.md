@@ -13,7 +13,7 @@
 
 ## how to
  just download the yt.php , include it and enjoy!
- for example checkout index.php
+ for example checkout index.php & example2.php
 
 ```
     include_once("./yt.php");
@@ -43,6 +43,5 @@
 
 
 ### Todo
- - load more videos [for all functions like homepagevideos , relatedvideos]
+ - load more videos [for methods like homepagevideos , relatedvideos]
  - video playable link speed increase
-
