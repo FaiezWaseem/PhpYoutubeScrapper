@@ -19,4 +19,14 @@ $youtube = new YT();
 // echo json_encode($youtube->getSearchNext('EroDEgVSZWFjdBqwA1NCU0NBUXRWUWtka2RURk1WVFl5TUlJQkMySmhiWFZ5TVV4cVpWQTRnZ0VMZVhGRFpEUlpTVUYwYVdPQ0FRdFBaR3B6ZDJReVJFbFZXWUlCQ3pKdVNVcHFSa0ptWjNWamdnRUxZamxsVFVkRk4xRjBWR3VDQVFzdFNWQkxVRnBsY2xGaWI0SUJDemxCZW5Gc2JHVjVSbWc0Z2dFTFpFZDJSbmR1Y2tOcGVVMkNBUXRIVFZScmNGQXRUM28wT0lJQkMxbFpNbHBvVlZGYWVVVTBnZ0VMZFZKVE9ERkxVbUZ2YzNPQ0FRdGZjMXBGTlV4bFJHZ3pZNElCQzFsZlNIb3hkRGh4Y25STmdnRUxVVFJIUjJaWk5YRkVZVldDQVF0VFgzTnpOMU5HWjFaaGE0SUJDelpxT1hSdVIwMWliVEpqZ2dFTFkxQk9ORWd3YzFORFNGR0NBU0pRVEVNemVUZ3Rja1pJZG5kblp6TjJZVmxLWjBoSGJrMXZaRUkxTkhKNFQyc3pnZ0VMZHpkbGFrUmFPRk5YZGppeUFRWUtCQWdhRUFMcUFRSUlBZyUzRCUzRBiB4OgYIgtzZWFyY2gtZmVlZA%3D%3D'));
 // var_dump($youtube->getSearchSuggestions('Top%20funny%20videos'));
 
+// Authorization of Youtube 
+// How to get authorization token and cookie please look into
+// repo images for the guide
+$env = parse_ini_file('.env');
+$authorization = $env['AUTHORIZATION'] ;
+$cookie = $env['COOKIE'];
+
+echo json_encode($youtube->HomePageVideosWithAuth($authorization,$cookie));
+
+
 

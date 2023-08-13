@@ -41,6 +41,41 @@
 ```
 
 
+## Authorization
+  
+  To get videos related to your Youtube account u need to be logged in
+  now in order to that we need a Acccount Authorization key and users cookie
+  so here are the steps
+
+  #### Step1
+   Open youtube.com with inspector open
+
+  #### Step2 
+    Go to Networks Tab Search for a Request called browser?key=xxxxwhatEverkeyherexxxx
+    click it when find it if , doesnt reload page
+
+  #### Step3
+    In Headers Tab Scroll Down and find authorization and cookie value , then copy it 
+    to your .env file;
+    paste in as Variable you like AUTHORIZATION and COOKIE
+    ```
+     AUTHORIZATION="SAPISIDHASH xxxxxx......xxxx....xxx"
+     COOKIE="VISITOR_INFO1_LIVE=fesy_ELdl0I; wide=0; YSCxxxx......"
+    ```
+
+ <img  src="HowTogetAuth.PNG" width="300" height="240">   
+
+ ```
+   // Authorization of Youtube 
+   $env = parse_ini_file('.env');
+   $authorization = $env['AUTHORIZATION'] ;
+   $cookie = $env['COOKIE'];
+
+   echo json_encode($youtube->HomePageVideosWithAuth($authorization,$cookie));
+
+ ```
+
+
 
 ### Todo
  - load more videos [for methods like homepagevideos , relatedvideos]
