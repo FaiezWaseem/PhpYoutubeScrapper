@@ -22,11 +22,14 @@ $youtube = new YT();
 // Authorization of Youtube 
 // How to get authorization token and cookie please look into
 // repo images for the guide
-$env = parse_ini_file('.env');
-$authorization = $env['AUTHORIZATION'] ;
-$cookie = $env['COOKIE'];
+// $env = parse_ini_file('.env');
+// $authorization = $env['AUTHORIZATION'] ;
+// $cookie = $env['COOKIE'];
 
-echo json_encode($youtube->HomePageVideosWithAuth($authorization,$cookie));
+// $youtube->setAuthorization($authorization);
+// $youtube->setCookie($cookie);
+// echo json_encode($youtube->HomePageVideosWithAuth());
+// echo json_encode($youtube->HomePageVideosNext('xx'));
 
 
 

@@ -6,7 +6,6 @@ Started this project just for testing and fun i dont recommend
 using it , The script works fine as of now June 21 2023
 Some stuff like video playable url dont work after a time 
 if send too many requests.
-
 I know code is dirty sorry for that is hard to read even i dont
 understand it after a week or two but atleast its working, thats 
 all matters to me :> 
@@ -21,6 +20,10 @@ class YT
     protected $search_query = 'results?search_query=';
 
     protected $channel = 'channel/';
+
+    protected string $authorization = null;
+
+    protected string $cookie = null;
 
     protected $FEATURED = 0;
     protected $VIDEOS = 1;
@@ -43,11 +46,19 @@ class YT
      */
     protected $PLAYLIST = 3;
 
-     /*
-       GET THE VIDEO ARRAY OF YT HOMEPAGE
-       THE RESULT DEPENDS ON SERVER LOCATION
-       IF IN AMERICA RETURN YT AMERICA TRENDING VIDEOS
-     */
+    public function setCookie(string $_ck)
+    {
+        $this->cookie = $_ck;
+    }
+    public function setAuthorization(string $_auth)
+    {
+        $this->authorization = $_auth;
+    }
+    /*
+    GET THE VIDEO ARRAY OF YT HOMEPAGE
+    THE RESULT DEPENDS ON SERVER LOCATION
+    IF IN AMERICA RETURN YT AMERICA TRENDING VIDEOS
+    */
     public function HomePageVideos()
     {
         $html = $this->get($this->base_url);
@@ -57,76 +68,125 @@ class YT
     /**
      *  To Get Your Videos With Channel Authentications
      *  Like You want the videos recommendations from your
-     *  Youtube Account Pass $authorization and $cookie
+     *  Youtube Account Set Cookie and Authorization
      *  
      *   Story : So youtube need a Authorization and a Cookie header to keep
      *   the record of wheter user is logged in or not , So We just neet to pass that and we are good 
-     *   to go
+     *   to go.
      * 
-     *  @param string $authorization
-     *  @param string $cookie
-    */
-    public function HomePageVideosWithAuth($authorization , $cookie = "" , $continuationToken = "4qmFsgKyAxIPRkV3aGF0X3RvX3dhdGNoGv4CQ0IxNmx3SkhUR1ZqZURsWExURlFPRU5OWjNOSmFYTmhSM1YwU0hWcFl6ZElRVlp3ZFVOdGQwdEhXR3d3V0ROQ2FGb3lWbVpqTWpWb1kwaE9iMkl6VW1aamJWWnVZVmM1ZFZsWGQxTklNbU4zVEZWV1drNUdiR2hYUjFwT1ZtdFdVV0V6YURSU1JWcHFXV3hTU2t4WVVtMWxiV3h4VlcxallVeG5RVUZhVnpSMFVqQkpRVUZXUWt4QlFVWlJVM2RCUWtGRldrWmtNbWhvWkVZNU1HSXhPVE5aV0ZKcVlVRkJRa0ZSU1VKQlVVRkNRVUZCUWtGUlFtbFJVV2RCUldoT2QxbFhaR3hZTTA1MVdWaENlbUZIT1RCWU0xSjJZVEpXZFVkb1RVa3dZbGhUTnpaRVdtZEJUVlpmTlhSTVFsSXdNSEpuZFhKSmFFMUpkRXhQVGpGaU4xVmZkMGxXTkhCWWJVTm9NRmR3VVdRNUxYQjZTSFpSYTBORFFqUSUzROgBBJoCGmJyb3dzZS1mZWVkRkV3aGF0X3RvX3dhdGNo"){
-        $curl = curl_init();
-        
-        curl_setopt_array($curl, [
-          CURLOPT_URL => "https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false",
-          CURLOPT_RETURNTRANSFER => true,
-          CURLOPT_ENCODING => "",
-          CURLOPT_MAXREDIRS => 10,
-          CURLOPT_TIMEOUT => 30,
-          CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-          CURLOPT_CUSTOMREQUEST => "POST",
-          CURLOPT_POSTFIELDS => "{\n  \"context\": {\n    \"client\": {\n      \"hl\": \"en-GB\",\n      \"gl\": \"UK\",\n      \"remoteHost\": \"119.152.234.18\",\n      \"deviceMake\": \"\",\n      \"deviceModel\": \"\",\n      \"visitorData\": \"CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D\",\n      \"userAgent\": \"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36,gzip(gfe)\",\n      \"clientName\": \"WEB\",\n      \"clientVersion\": \"2.20230613.01.00\",\n      \"osName\": \"Windows\",\n      \"osVersion\": \"6.3\",\n      \"originalUrl\": \"https://www.youtube.com/\",\n      \"platform\": \"DESKTOP\",\n      \"clientFormFactor\": \"UNKNOWN_FORM_FACTOR\",\n      \"configInfo\": {\n        \"appInstallData\": \"CL6MrKQGEMzfrgUQssavBRD4ta8FEInorgUQzK7-EhCi7K4FEMy3_hIQ1bavBRDi1K4FEIKdrwUQkKOvBRDwtq8FEMO3_hIQ57qvBRDzqK8FELq0rwUQq7evBRC4i64FEOuTrgUQpZmvBRCitK8FEKXC_hIQ26-vBRDn964FEOCnrwUQj8OvBRDpw68FEO6irwUQ5LP-EhC9tq4FEKqy_hIQjLevBRDUoa8FEP61rwUQlb-vBRDetq8FEJvV_hI%3D\"\n      },\n      \"timeZone\": \"Asia/Karachi\",\n      \"browserName\": \"Chrome\",\n      \"browserVersion\": \"109.0.0.0\",\n      \"acceptHeader\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8\",\n      \"deviceExperimentId\": \"ChxOekU0T0RnMU9EazBORGt5TlRrMk1qTTFNQT09EL6MrKQGGJ_qj54G\",\n      \"screenWidthPoints\": 980,\n      \"screenHeightPoints\": 1672,\n      \"screenPixelDensity\": 2,\n      \"screenDensityFloat\": 2,\n      \"utcOffsetMinutes\": 300,\n      \"userInterfaceTheme\": \"USER_INTERFACE_THEME_LIGHT\",\n      \"memoryTotalKbytes\": \"8000000\",\n      \"mainAppWebInfo\": {\n        \"graftUrl\": \"https://www.youtube.com/\",\n        \"pwaInstallabilityStatus\": \"PWA_INSTALLABILITY_STATUS_CAN_BE_INSTALLED\",\n        \"webDisplayMode\": \"WEB_DISPLAY_MODE_BROWSER\",\n        \"isWebNativeShareAvailable\": false\n      }\n    },\n    \"user\": {\n      \"lockedSafetyMode\": false\n    },\n    \"request\": {\n      \"useSsl\": true,\n      \"internalExperimentFlags\": [],\n      \"consistencyTokenJars\": []\n    },\n    \"clickTracking\": {\n      \"clickTrackingParams\": \"CBgQ8eIEIhMIvJi5wKXF_wIVS1YPAh2Ebwev\"\n    },\n    \"adSignalsInfo\": {\n      \"params\": [\n        {\n          \"key\": \"dt\",\n          \"value\": \"1686832707442\"\n        },\n        {\n          \"key\": \"flash\",\n          \"value\": \"0\"\n        },\n        {\n          \"key\": \"frm\",\n          \"value\": \"0\"\n        },\n        {\n          \"key\": \"u_tz\",\n          \"value\": \"300\"\n        },\n        {\n          \"key\": \"u_his\",\n          \"value\": \"2\"\n        },\n        {\n          \"key\": \"u_h\",\n          \"value\": \"962\"\n        },\n        {\n          \"key\": \"u_w\",\n          \"value\": \"564\"\n        },\n        {\n          \"key\": \"u_ah\",\n          \"value\": \"962\"\n        },\n        {\n          \"key\": \"u_aw\",\n          \"value\": \"564\"\n        },\n        {\n          \"key\": \"u_cd\",\n          \"value\": \"24\"\n        },\n        {\n          \"key\": \"bc\",\n          \"value\": \"31\"\n        },\n        {\n          \"key\": \"bih\",\n          \"value\": \"1671\"\n        },\n        {\n          \"key\": \"biw\",\n          \"value\": \"980\"\n        },\n        {\n          \"key\": \"brdim\",\n          \"value\": \"0,0,0,0,564,0,564,962,980,1672\"\n        },\n        {\n          \"key\": \"vis\",\n          \"value\": \"1\"\n        },\n        {\n          \"key\": \"wgl\",\n          \"value\": \"true\"\n        },\n        {\n          \"key\": \"ca_type\",\n          \"value\": \"image\"\n        }\n      ]\n    }\n  },\n  \"continuation\": \"$continuationToken\"\n}",
-          CURLOPT_HTTPHEADER => [
-            "Accept: */*",
-            "User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36",
-            "authorization: $authorization",
-            "content-type: application/json",
-            "cookie: $cookie",
-            "x-goog-authuser: 1",
-            "x-goog-visitor-id: CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D",
-            "x-origin: https://www.youtube.com",
-            "x-youtube-client-name: 1",
-            "x-youtube-client-version: 2.20230613.01.00"
-          ],
-        ]);
-        
-        $response = curl_exec($curl);
-        $err = curl_error($curl);
-        
-        curl_close($curl);
-        
-        if ($err) {
-          echo "cURL Error #:" . $err;
-        } else {
-            $response = json_decode($response);
-            $videosJson = $response->onResponseReceivedActions[0]->appendContinuationItemsAction->continuationItems;
-            $videos = [];
-            $nextToken = null;
-            foreach ($videosJson as $value) {
-                if (isset($value->richItemRenderer)) {
-                    $_video = $value->richItemRenderer->content->videoRenderer;
-                    $video['videoId'] = $_video->videoId ?? '';
-                    $video['viewCount'] = $_video->viewCountText->simpleText ?? '';
-                    $video['title'] = $_video->title->runs[0]->text ?? '';
-                    $video['thumbnails'] = $_video->thumbnail->thumbnails ?? [];
-                    $video['description'] = $_video->descriptionSnippet->runs[0]->text ?? '';
-                    $video['channelName'] = $_video->longBylineText->runs[0]->text ?? '';
-                    $video['channelThumbnail'] = $_video->channelThumbnailSupportedRenderers->channelThumbnailWithLinkRenderer->thumbnail->thumbnails[0]->url ?? [];
-                    $video['publishedTime'] = $_video->publishedTimeText->simpleText ?? '';
-                    $video['length'] = $_video->lengthText->accessibility->accessibilityData->label ?? '';
-                    array_push($videos, $video);
-                }
-                if(isset($value->continuationItemRenderer)){
-                   $nextToken = $value->continuationItemRenderer->continuationEndpoint->continuationCommand->token;
-                }
+     */
+    public function HomePageVideosWithAuth()
+    {
+        if ($this->authorization && $this->cookie) {
+            $_auth = $this->authorization;
+            $ck = $this->cookie;
+
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://www.youtube.com/",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_HTTPHEADER => [
+                    "Accept: */*",
+                    "User-Agent: Thunder Client (https://www.thunderclient.com)",
+                    "authorization: $_auth",
+                    "cookie: $ck",
+                    "x-goog-authuser: 1",
+                    "x-goog-visitor-id: CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D",
+                    "x-origin: https://www.youtube.com",
+                    "x-youtube-client-name: 1",
+                    "x-youtube-client-version: 2.20230613.01.00"
+                ],
+            ]);
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+
+            curl_close($curl);
+
+            if ($err) {
+                echo "cURL Error #:" . $err;
+            } else {
+                $json = $this->getInitalData($response, 34);
+                // return $json;
+                return $this->parseHomePageVideos($json);
             }
-            return [
-                'videos' => $videos,
-                'nextToken' => $nextToken,
-            ];
-        //   echo $response;
+        } else {
+            throw new ErrorException("User is ot Authorized");
+        }
+    }
+    public function HomePageVideosNext(string $continuationToken = null)
+    {
+        if ($this->authorization && $this->cookie) {
+            $_auth = $this->authorization;
+            $ck = $this->cookie;
+            $curl = curl_init();
+
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8&prettyPrint=false",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => "{\n  \"context\": {\n    \"client\": {\n      \"hl\": \"en-GB\",\n      \"gl\": \"UK\",\n      \"remoteHost\": \"119.152.234.18\",\n      \"deviceMake\": \"\",\n      \"deviceModel\": \"\",\n      \"visitorData\": \"CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D\",\n      \"userAgent\": \"Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36,gzip(gfe)\",\n      \"clientName\": \"WEB\",\n      \"clientVersion\": \"2.20230613.01.00\",\n      \"osName\": \"Windows\",\n      \"osVersion\": \"6.3\",\n      \"originalUrl\": \"https://www.youtube.com/\",\n      \"platform\": \"DESKTOP\",\n      \"clientFormFactor\": \"UNKNOWN_FORM_FACTOR\",\n      \"configInfo\": {\n        \"appInstallData\": \"CL6MrKQGEMzfrgUQssavBRD4ta8FEInorgUQzK7-EhCi7K4FEMy3_hIQ1bavBRDi1K4FEIKdrwUQkKOvBRDwtq8FEMO3_hIQ57qvBRDzqK8FELq0rwUQq7evBRC4i64FEOuTrgUQpZmvBRCitK8FEKXC_hIQ26-vBRDn964FEOCnrwUQj8OvBRDpw68FEO6irwUQ5LP-EhC9tq4FEKqy_hIQjLevBRDUoa8FEP61rwUQlb-vBRDetq8FEJvV_hI%3D\"\n      },\n      \"timeZone\": \"Asia/Karachi\",\n      \"browserName\": \"Chrome\",\n      \"browserVersion\": \"109.0.0.0\",\n      \"acceptHeader\": \"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8\",\n      \"deviceExperimentId\": \"ChxOekU0T0RnMU9EazBORGt5TlRrMk1qTTFNQT09EL6MrKQGGJ_qj54G\",\n      \"screenWidthPoints\": 980,\n      \"screenHeightPoints\": 1672,\n      \"screenPixelDensity\": 2,\n      \"screenDensityFloat\": 2,\n      \"utcOffsetMinutes\": 300,\n      \"userInterfaceTheme\": \"USER_INTERFACE_THEME_LIGHT\",\n      \"memoryTotalKbytes\": \"8000000\",\n      \"mainAppWebInfo\": {\n        \"graftUrl\": \"https://www.youtube.com/\",\n        \"pwaInstallabilityStatus\": \"PWA_INSTALLABILITY_STATUS_CAN_BE_INSTALLED\",\n        \"webDisplayMode\": \"WEB_DISPLAY_MODE_BROWSER\",\n        \"isWebNativeShareAvailable\": false\n      }\n    },\n    \"user\": {\n      \"lockedSafetyMode\": false\n    },\n    \"request\": {\n      \"useSsl\": true,\n      \"internalExperimentFlags\": [],\n      \"consistencyTokenJars\": []\n    },\n    \"clickTracking\": {\n      \"clickTrackingParams\": \"CBgQ8eIEIhMIvJi5wKXF_wIVS1YPAh2Ebwev\"\n    },\n    \"adSignalsInfo\": {\n      \"params\": [\n        {\n          \"key\": \"dt\",\n          \"value\": \"1686832707442\"\n        },\n        {\n          \"key\": \"flash\",\n          \"value\": \"0\"\n        },\n        {\n          \"key\": \"frm\",\n          \"value\": \"0\"\n        },\n        {\n          \"key\": \"u_tz\",\n          \"value\": \"300\"\n        },\n        {\n          \"key\": \"u_his\",\n          \"value\": \"2\"\n        },\n        {\n          \"key\": \"u_h\",\n          \"value\": \"962\"\n        },\n        {\n          \"key\": \"u_w\",\n          \"value\": \"564\"\n        },\n        {\n          \"key\": \"u_ah\",\n          \"value\": \"962\"\n        },\n        {\n          \"key\": \"u_aw\",\n          \"value\": \"564\"\n        },\n        {\n          \"key\": \"u_cd\",\n          \"value\": \"24\"\n        },\n        {\n          \"key\": \"bc\",\n          \"value\": \"31\"\n        },\n        {\n          \"key\": \"bih\",\n          \"value\": \"1671\"\n        },\n        {\n          \"key\": \"biw\",\n          \"value\": \"980\"\n        },\n        {\n          \"key\": \"brdim\",\n          \"value\": \"0,0,0,0,564,0,564,962,980,1672\"\n        },\n        {\n          \"key\": \"vis\",\n          \"value\": \"1\"\n        },\n        {\n          \"key\": \"wgl\",\n          \"value\": \"true\"\n        },\n        {\n          \"key\": \"ca_type\",\n          \"value\": \"image\"\n        }\n      ]\n    }\n  },\n  \"continuation\": \"$continuationToken\"\n}",
+                CURLOPT_HTTPHEADER => [
+                    "Accept: */*",
+                    "User-Agent: Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36",
+                    "authorization: $_auth",
+                    "content-type: application/json",
+                    "cookie: $ck",
+                    "x-goog-authuser: 1",
+                    "x-goog-visitor-id: CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D",
+                    "x-origin: https://www.youtube.com",
+                    "x-youtube-client-name: 1",
+                    "x-youtube-client-version: 2.20230613.01.00"
+                ],
+            ]);
+
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+
+            curl_close($curl);
+
+            if ($err) {
+                echo "cURL Error #:" . $err;
+            } else {
+                $response = json_decode($response);
+                $videosJson = $response->onResponseReceivedActions[0]->appendContinuationItemsAction->continuationItems;
+                $videos = [];
+                $nextToken = null;
+                foreach ($videosJson as $value) {
+                    if (isset($value->richItemRenderer)) {
+                        $_video = $value->richItemRenderer->content->videoRenderer;
+                        $video['videoId'] = $_video->videoId ?? '';
+                        $video['viewCount'] = $_video->viewCountText->simpleText ?? '';
+                        $video['title'] = $_video->title->runs[0]->text ?? '';
+                        $video['thumbnails'] = $_video->thumbnail->thumbnails ?? [];
+                        $video['description'] = $_video->descriptionSnippet->runs[0]->text ?? '';
+                        $video['channelName'] = $_video->longBylineText->runs[0]->text ?? '';
+                        $video['channelThumbnail'] = $_video->channelThumbnailSupportedRenderers->channelThumbnailWithLinkRenderer->thumbnail->thumbnails[0]->url ?? [];
+                        $video['publishedTime'] = $_video->publishedTimeText->simpleText ?? '';
+                        $video['length'] = $_video->lengthText->accessibility->accessibilityData->label ?? '';
+                        array_push($videos, $video);
+                    }
+                    if (isset($value->continuationItemRenderer)) {
+                        $nextToken = $value->continuationItemRenderer->continuationEndpoint->continuationCommand->token;
+                    }
+                }
+                return [
+                    'videos' => $videos,
+                    'nextToken' => $nextToken,
+                ];
+            }
+        } else {
+            throw new ErrorException("User is ot Authorized");
         }
     }
     /**
@@ -144,10 +204,10 @@ class YT
         return $this->parseSearchResult($json);
     }
     /*
-     pass a video Id it will return its related
-     videos Array
-     @param string $videoId
-     @return array
+    pass a video Id it will return its related
+    videos Array
+    @param string $videoId
+    @return array
     */
     public function getRelatedVideo($videoId)
     {
@@ -238,17 +298,17 @@ class YT
             'comment' => $this->getVideoCommentInfo($json2)
         );
     }
-     /*
-     pass the commentToken obtained from getVideo method or obtained 
-     from last loaded comments
-     */
+    /*
+    pass the commentToken obtained from getVideo method or obtained 
+    from last loaded comments
+    */
     public function getComments(string $nextToken)
     {
         $json = $this->postNext($nextToken);
         // return $json;
         return $this->getParsedComments($json);
     }
-    
+
     public function getReplyComments(string $nextToken)
     {
         $json = $this->postNext($nextToken);
@@ -574,6 +634,7 @@ class YT
     {
         $videosJson = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["richGridRenderer"]["contents"];
         $videos = [];
+        $nextToken = null;
         foreach ($videosJson as $value) {
             if (isset($value["richItemRenderer"])) {
                 $_video = $this->arrayGet($value, 'richItemRenderer.content.videoRenderer');
@@ -586,8 +647,14 @@ class YT
                 $video['channelThumbnail'] = $_video["channelThumbnailSupportedRenderers"]["channelThumbnailWithLinkRenderer"]["thumbnail"]["thumbnails"][0]["url"];
                 array_push($videos, $video);
             }
+            if (isset($value["continuationItemRenderer"])) {
+                $nextToken = $value["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
+            }
         }
-        return $videos;
+        return [
+            'videos' => $videos,
+            'nextToken' => $nextToken
+        ];
     }
 
     protected function parseSearchResult($json)

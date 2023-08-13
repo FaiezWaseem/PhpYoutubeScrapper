@@ -63,15 +63,23 @@
      COOKIE="VISITOR_INFO1_LIVE=fesy_ELdl0I; wide=0; YSCxxxx......"
     ```
 
- <img  src="HowTogetAuth.PNG" width="300" height="240">   
+ <img  src="HowTogetAuth.PNG" >   
 
  ```
-   // Authorization of Youtube 
-   $env = parse_ini_file('.env');
-   $authorization = $env['AUTHORIZATION'] ;
-   $cookie = $env['COOKIE'];
+ 
+     /**
+     * -----------------------------------
+     *          AUTHORIZATION
+     * -----------------------------------
+     */
+       $env = parse_ini_file('.env');
+       $authorization = $env['AUTHORIZATION'];
+       $cookie = $env['COOKIE'];
+       $yt->setAuthorization($authorization);
+       $yt->setCookie($cookie);
+    // ------------------------------------
 
-   echo json_encode($youtube->HomePageVideosWithAuth($authorization,$cookie));
+      echo json_encode($youtube->HomePageVideosWithAuth());
 
  ```
 

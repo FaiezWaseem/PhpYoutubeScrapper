@@ -5,6 +5,21 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 include_once("./yt.php");
 $yt = new YT();
 
+
+/**
+ * -----------------------------------
+ *          AUTHORIZATION
+ * -----------------------------------
+ */
+$env = parse_ini_file('.env');
+$authorization = $env['AUTHORIZATION'];
+$cookie = $env['COOKIE'];
+$yt->setAuthorization($authorization);
+$yt->setCookie($cookie);
+// ------------------------------------
+
+
+
 if (isset($_GET["videoInfo"])) {
     $vid_id = $_GET["videoInfo"];
     $res = $yt->getVideo($vid_id);
@@ -51,15 +66,7 @@ if (isset($_GET["getSearchNext"])) {
     echo response(200, 'ok', $yt->getSearchNext($_GET["getSearchNext"]));
 }
 if (isset($_GET["recomendedAuth"])) {
-    $env = parse_ini_file('.env');
-    $authorization = $env['AUTHORIZATION'];
-    $cookie = $env['COOKIE'];
-    if(isset($_GET["nextToken"])){
-        $token = $_GET["nextToken"];
-        echo response(200, 'ok', $yt->HomePageVideosWithAuth($authorization, $cookie , $token));
-    }else{
-        echo response(200, 'ok', $yt->HomePageVideosWithAuth($authorization, $cookie));
-    }
+    echo response(200, 'ok', $yt->HomePageVideosWithAuth());
 }
 
 
