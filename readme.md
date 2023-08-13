@@ -63,7 +63,7 @@
      COOKIE="VISITOR_INFO1_LIVE=fesy_ELdl0I; wide=0; YSCxxxx......"
     ```
 
- <img  src="HowTogetAuth.PNG" width="300" height="240">   
+ <img  src="HowTogetAuth.PNG" >   
 
  ```
    // Authorization of Youtube 
