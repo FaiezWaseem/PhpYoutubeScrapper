@@ -21,9 +21,9 @@ class YT
 
     protected $channel = 'channel/';
 
-    protected string $authorization = null;
+    protected  $authorization = null;
 
-    protected string $cookie = null;
+    protected  $cookie = null;
 
     protected $FEATURED = 0;
     protected $VIDEOS = 1;

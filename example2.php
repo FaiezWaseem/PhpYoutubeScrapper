@@ -68,6 +68,9 @@ if (isset($_GET["getSearchNext"])) {
 if (isset($_GET["recomendedAuth"])) {
     echo response(200, 'ok', $yt->HomePageVideosWithAuth());
 }
+if (isset($_GET["getHomeNext"])) {
+    echo response(200, 'ok', $yt->HomePageVideosNext($_GET["getHomeNext"]));
+}
 
 
 function response($status, $status_message, $data)
