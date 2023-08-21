@@ -632,29 +632,56 @@ class YT
 
     protected function parseHomePageVideos($json)
     {
+        $UserAvatar =  "";
+        if($this->authorization && $this->cookie){
+          $UserAvatar = $json["topbar"]["desktopTopbarRenderer"]["topbarButtons"][2]["topbarMenuButtonRenderer"]["avatar"]["thumbnails"][0]["url"] ?? "";
+        }
         $videosJson = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["richGridRenderer"]["contents"];
+        $chips = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["richGridRenderer"]["header"]["feedFilterChipBarRenderer"]["contents"];
         $videos = [];
+        $videoShorts = [];
         $nextToken = null;
         foreach ($videosJson as $value) {
             if (isset($value["richItemRenderer"])) {
                 $_video = $this->arrayGet($value, 'richItemRenderer.content.videoRenderer');
-                $video['videoId'] = $this->arrayGet($_video, 'videoId', '');
-                $video['viewCount'] = $this->arrayGet($_video, 'viewCountText.simpleText', '');
-                $video['title'] = $_video["title"]["runs"][0]["text"];
-                $video['thumbnails'] = $this->arrayGet($_video, 'thumbnail.thumbnails', []);
-                $video['description'] = $this->isExits("descriptionSnippet", $_video, $_video["descriptionSnippet"]["runs"][0]["text"]);
-                $video['channelName'] = $_video["longBylineText"]["runs"][0]["text"];
-                $video['channelThumbnail'] = $_video["channelThumbnailSupportedRenderers"]["channelThumbnailWithLinkRenderer"]["thumbnail"]["thumbnails"][0]["url"];
+                $video['videoId'] = $this->arrayGet($_video, 'videoId', '') ?? "";
+                $video['viewCount'] = $this->arrayGet($_video, 'viewCountText.simpleText', '') ?? "";
+                $video['title'] = $_video["title"]["runs"][0]["text"] ?? "";
+                $video['thumbnails'] = $this->arrayGet($_video, 'thumbnail.thumbnails', []) ?? "";
+                $video['description'] = $_video["descriptionSnippet"]["runs"][0]["text"] ?? "";
+                $video['channelName'] = $_video["longBylineText"]["runs"][0]["text"] ?? "";
+                $video['channelThumbnail'] = $_video["channelThumbnailSupportedRenderers"]["channelThumbnailWithLinkRenderer"]["thumbnail"]["thumbnails"][0]["url"] ?? [];
                 array_push($videos, $video);
             }
             if (isset($value["continuationItemRenderer"])) {
                 $nextToken = $value["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
             }
+            if(isset($value["richSectionRenderer"])){
+             $_shrtVideos = $this->arrayGet($value, 'richSectionRenderer.content.richShelfRenderer.contents');   
+             $videoShorts = [...$videoShorts , ...$this->getShorts($_shrtVideos)];
+            }
         }
         return [
+            'userAvatar' => $UserAvatar,
             'videos' => $videos,
-            'nextToken' => $nextToken
+            'videoShorts' => $videoShorts,
+            'chips' => $chips,
+            'nextToken' => $nextToken,
         ];
+    }
+    protected function getShorts($shorts = []){
+        $parsedJSON = [];
+         foreach ($shorts as  $value) {
+            if (isset($value["richItemRenderer"]["content"]["reelItemRenderer"])) {
+                $_video = $this->arrayGet($value, 'richItemRenderer.content.reelItemRenderer');
+                $video['title'] = $_video["headline"]["simpleText"] ?? "";
+                $video['videoId'] = $_video["videoId"] ?? "";
+                $video['viewCount'] = $_video["viewCountText"]["simpleText"] ?? "";
+                $video['thumbnails'] = $_video["thumbnail"]["thumbnails"] ?? [];
+                array_push($parsedJSON , $video);
+            }
+         }
+         return $parsedJSON;
     }
 
     protected function parseSearchResult($json)

@@ -6,7 +6,7 @@ $youtube = new YT();
 
 
 // echo json_encode($youtube->search("WordPress+Tutorail"));
-// echo json_encode($youtube->HomePageVideos());
+echo json_encode($youtube->HomePageVideos());
 // echo json_encode($youtube->getRelatedVideo('GlLRYml8mCY'));
 // echo json_encode($youtube->getVideo('1WEAJ-DFkHE'));
 // echo json_encode($youtube->getChannelFeatured('UC8aFE06Cti9OnQcKpl6rDvQ'));
