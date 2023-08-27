@@ -21,30 +21,19 @@ class YT
 
     protected $channel = 'channel/';
 
-    protected  $authorization = null;
+    protected $authorization = null;
 
-    protected  $cookie = null;
+    protected $cookie = null;
 
-    protected $FEATURED = 0;
-    protected $VIDEOS = 1;
-    /**
-     * Some Channels Dont have shorts 
-     * so this wont work in that case
-     * and then playlist also wont show 
-     * because the we messed up with 
-     * array index you know so playlist  
-     * would be index 2 not 3 but if   
-     * channel do live streams than    
-     * playlist index becomes 3 again    
-     * so its all confusion so leaving    
-     * it to 2 , so it works in some cases    
-     */
-    protected $SHORTS = 2;
-    /**
-     * Some Channels has Stream Tab so need to Change
-     * Playlist index to 4 in that case
-     */
-    protected $PLAYLIST = 3;
+    protected $FEATURED = 'featured';
+    protected $VIDEOS = 'videos';
+    protected $SHORTS = 'shorts';
+    protected $PLAYLIST = 'playlists';
+    protected $STREAMS = 'streams';
+    protected $COMMUNITY = 'community';
+    protected $ABOUT = 'about';
+
+
 
     public function setCookie(string $_ck)
     {
@@ -222,9 +211,30 @@ class YT
     public function getChannelFeatured($channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId);
-        $json = $this->getInitalData($html, 34);
+        $json = $this->getInitalData($html, 37);
         return $this->getParseChannelVideos($json, $this->FEATURED);
-        // return $json;
+    }
+    /*
+    pass the channelId as String 
+    get an Array of Videos Object
+    */
+    public function getChannelLive($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/streams');
+        $json = $this->getInitalData($html, 37);
+        return $this->getParseChannelVideos($json, $this->STREAMS);
+    }
+    public function getChannelCommunity($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/community');
+        $json = $this->getInitalData($html, 37);
+        return $this->getParseChannelVideos($json, $this->COMMUNITY);
+    }
+    public function getChannelAbout($channelId)
+    {
+        $html = $this->get($this->base_url . $this->channel . $channelId . '/about');
+        $json = $this->getInitalData($html, 37);
+        return $this->getParseChannelVideos($json, $this->ABOUT);
     }
     /*
     pass the channelId as String 
@@ -245,7 +255,6 @@ class YT
         $html = $this->get($this->base_url . $this->channel . $channelId . '/shorts');
         $json = $this->getInitalData($html, 34);
         return $this->getParseChannelVideos($json, $this->SHORTS);
-        // return $json;
     }
     /*
     pass the channelId as String 
@@ -266,6 +275,7 @@ class YT
     {
         $html = $this->get($this->base_url . $this->channel . $channelId . '/playlists');
         $json = $this->getInitalData($html, 34);
+        $totalTabs = sizeof($json['contents']['twoColumnBrowseResultsRenderer']['tabs']);
         return array(
             'title' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.title', ''),
             'avatar' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.avatar.thumbnails', []),
@@ -274,6 +284,7 @@ class YT
             'videosCount' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.videosCountText.runs.0.text', ''),
             'tagline' => $this->arrayGet($json, 'header.c4TabbedHeaderRenderer.tagline.channelTaglineRenderer.content', ''),
             'description' => $this->arrayGet($json, 'metadata.channelMetadataRenderer.description', ''),
+            'totalTabs' => $totalTabs,
         );
     }
 
@@ -483,6 +494,7 @@ class YT
         if (preg_match('/ytInitialData\s*=\s*({.+?})\s*;/i', $html, $matches)) {
             $json = $matches[1];
             return json_decode($json, true);
+
         }
         // Else  we will load it in dom and get through index
         $doc = new DOMDocument();
@@ -515,31 +527,101 @@ class YT
         return $output;
     }
 
-    protected function getParseChannelVideos($json, $index)
+    protected function getParseChannelVideos($json, $page)
     {
-        $_res = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][$index]["tabRenderer"]["content"] ?? null;
-        if ($_res) {
-            switch ($index) {
-                case $this->FEATURED:
-                    $_videos = $_res["sectionListRenderer"]["contents"];
-                    return $this->getParsedChannelFeatures($_videos);
-                case $this->VIDEOS:
-                    $_videos = $_res["richGridRenderer"]["contents"];
-                    return $this->getParsedChannelVideos($_videos);
-                case $this->SHORTS:
-                    $_videos = $_res["richGridRenderer"]["contents"];
-                    return $this->getParsedChannelShorts($_videos);
-                case $this->PLAYLIST:
-                    $_videos = $_res["sectionListRenderer"]["contents"];
-                    return $this->getParsedChannelPlaylist($_videos);
-                default:
-                    return [];
-            }
+        $valid = $this->isValidChannel($json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"], $page);
 
-        } else {
-            $this->PLAYLIST = $index + 1;
-            return $this->getParseChannelVideos($json, $index + 1);
+        if (!$valid['isValid']) {
+            return [];
         }
+        $_res = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][$valid['index']]["tabRenderer"]["content"] ?? null;
+
+        switch ($page) {
+            case $this->ABOUT:
+                $OBJ = $_res["sectionListRenderer"]["contents"][0]['itemSectionRenderer']['contents'][0]['channelAboutFullMetadataRenderer'];
+                return array(
+                    'description' => $OBJ['description']['simpleText'] ?? '',
+                    'viewCount' => $OBJ['viewCountText']['simpleText'] ?? '',
+                    'joinedDate' => $OBJ['joinedDateText']['runs'][0]['text'] ?? '',
+                    'avatar' => $OBJ['avatar']['thumbnails'] ?? [],
+                    'country' => $OBJ['country']['simpleText'] ?? '',
+                    'channelId' => $OBJ['channelId'] ?? '',
+                    'links' => $this->extractLink($OBJ['links']) ?? [],
+                );
+            case $this->FEATURED:
+                $_videos = $_res["sectionListRenderer"]["contents"];
+                return $this->getParsedChannelFeatures($_videos);
+            case $this->VIDEOS:
+                $_videos = $_res["richGridRenderer"]["contents"];
+                return $this->getParsedChannelVideos($_videos);
+            case $this->COMMUNITY:
+                $_videos = $_res["sectionListRenderer"]["contents"][0]['itemSectionRenderer']['contents'];
+                return $this->getParsedChannelCommunity($_videos);
+            case $this->STREAMS:
+                $_videos = $_res["richGridRenderer"]["contents"];
+                return $this->getParsedChannelVideos($_videos); // returns same data as videos
+            case $this->SHORTS:
+                $_videos = $_res["richGridRenderer"]["contents"];
+                return $this->getParsedChannelShorts($_videos);
+            case $this->PLAYLIST:
+                $_videos = $_res["sectionListRenderer"]["contents"];
+                return $this->getParsedChannelPlaylist($_videos);
+            default:
+                return [];
+        }
+    }
+    protected function isValidChannel($el, $match)
+    {
+        $till = sizeof($el);
+        for ($i = 0; $i < $till; $i++) {
+            $element = $el[$i];
+            $url = $element['tabRenderer']['endpoint']['commandMetadata']['webCommandMetadata']['url'] ?? '';
+            if (preg_match("/\b" . preg_quote($match) . "\b/", $url)) {
+                return array(
+                    'index' => $i,
+                    'isValid' => true
+                );
+            }
+        }
+        return array(
+            'index' => 0,
+            'isValid' => false
+        );
+    }
+    protected function extractLink($_link = []){
+     $links =[];
+     foreach ($_link as $key => $value) {
+        array_push($links , array(
+            'link' => $value['channelExternalLinkViewModel']['link']['content'],
+            'title' => $value['channelExternalLinkViewModel']['title']['content'],
+        ));
+     }
+     return $links;
+    }
+    protected function getParsedChannelCommunity($_videos){
+        $posts = array();
+        $nextToken = null;
+        foreach ($_videos as $key => $value) {
+             $post =  $value['backstagePostThreadRenderer']['post']['backstagePostRenderer'] ?? null;
+             if($post){
+                $_post['postId'] = $post['postId'] ?? '';
+                $_post['Author'] = $post['authorText']['runs'][0]['text'] ?? '';
+                $_post['AuthorThumbnail'] = $post['authorThumbnail']['thumbnails'] ?? [];
+                $_post['postText'] = $post['contentText']['runs'] ?? [];
+                $_post['postImages'] = $post['backstageAttachment']['postMultiImageRenderer']['images'] ?? [];
+                $_post['publishedTime'] = $post['publishedTimeText']['runs'][0]['text'] ?? '';
+                $_post['voteCount'] = $post['voteCount']['simpleText'] ?? '';
+                $_post['replyCount'] = $post['actionButtons']['commentActionButtonsRenderer']['replyButton']['buttonRenderer']['text']['simpleText'] ?? '';
+                array_push($posts , $_post);
+             }else{
+                $nextToken = $value['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'];
+             }
+             
+        }
+        return array(
+            'posts' => $posts,
+            'nextToken' => $nextToken
+        );
     }
     protected function getParsedChannelPlaylist($_videos)
     {
@@ -632,9 +714,9 @@ class YT
 
     protected function parseHomePageVideos($json)
     {
-        $UserAvatar =  "";
-        if($this->authorization && $this->cookie){
-          $UserAvatar = $json["topbar"]["desktopTopbarRenderer"]["topbarButtons"][2]["topbarMenuButtonRenderer"]["avatar"]["thumbnails"][0]["url"] ?? "";
+        $UserAvatar = "";
+        if ($this->authorization && $this->cookie) {
+            $UserAvatar = $json["topbar"]["desktopTopbarRenderer"]["topbarButtons"][2]["topbarMenuButtonRenderer"]["avatar"]["thumbnails"][0]["url"] ?? "";
         }
         $videosJson = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["richGridRenderer"]["contents"];
         $chips = $json["contents"]["twoColumnBrowseResultsRenderer"]["tabs"][0]["tabRenderer"]["content"]["richGridRenderer"]["header"]["feedFilterChipBarRenderer"]["contents"];
@@ -656,9 +738,9 @@ class YT
             if (isset($value["continuationItemRenderer"])) {
                 $nextToken = $value["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
             }
-            if(isset($value["richSectionRenderer"])){
-             $_shrtVideos = $this->arrayGet($value, 'richSectionRenderer.content.richShelfRenderer.contents');   
-             $videoShorts = [...$videoShorts , ...$this->getShorts($_shrtVideos)];
+            if (isset($value["richSectionRenderer"])) {
+                $_shrtVideos = $this->arrayGet($value, 'richSectionRenderer.content.richShelfRenderer.contents');
+                $videoShorts = [...$videoShorts, ...$this->getShorts($_shrtVideos)];
             }
         }
         return [
@@ -669,19 +751,20 @@ class YT
             'nextToken' => $nextToken,
         ];
     }
-    protected function getShorts($shorts = []){
+    protected function getShorts($shorts = [])
+    {
         $parsedJSON = [];
-         foreach ($shorts as  $value) {
+        foreach ($shorts as $value) {
             if (isset($value["richItemRenderer"]["content"]["reelItemRenderer"])) {
                 $_video = $this->arrayGet($value, 'richItemRenderer.content.reelItemRenderer');
                 $video['title'] = $_video["headline"]["simpleText"] ?? "";
                 $video['videoId'] = $_video["videoId"] ?? "";
                 $video['viewCount'] = $_video["viewCountText"]["simpleText"] ?? "";
                 $video['thumbnails'] = $_video["thumbnail"]["thumbnails"] ?? [];
-                array_push($parsedJSON , $video);
+                array_push($parsedJSON, $video);
             }
-         }
-         return $parsedJSON;
+        }
+        return $parsedJSON;
     }
 
     protected function parseSearchResult($json)

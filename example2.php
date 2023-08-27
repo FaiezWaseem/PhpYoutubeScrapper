@@ -44,6 +44,14 @@ if (isset($_GET["channel_feature"])) {
     $channelId = $_GET["channel_feature"];
     echo response(200, 'ok', $yt->getChannelFeatured($channelId));
 }
+if (isset($_GET["channel_live"])) {
+    $channelId = $_GET["channel_feature"];
+    echo response(200, 'ok', $yt->getChannelLive($channelId));
+}
+if (isset($_GET["channel_community"])) {
+    $channelId = $_GET["channel_feature"];
+    echo response(200, 'ok', $yt->getChannelCommunity($channelId));
+}
 if (isset($_GET["channel_videos"])) {
     $channelId = $_GET["channel_videos"];
     echo response(200, 'ok', $yt->getChannelVideos($channelId));

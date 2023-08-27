@@ -6,10 +6,13 @@ $youtube = new YT();
 
 
 // echo json_encode($youtube->search("WordPress+Tutorail"));
-echo json_encode($youtube->HomePageVideos());
+// echo json_encode($youtube->HomePageVideos());
 // echo json_encode($youtube->getRelatedVideo('GlLRYml8mCY'));
 // echo json_encode($youtube->getVideo('1WEAJ-DFkHE'));
-// echo json_encode($youtube->getChannelFeatured('UC8aFE06Cti9OnQcKpl6rDvQ'));
+// echo json_encode($youtube->getChannelFeatured('UCX6OQ3DkcsbYNE6H8uQQuVA'));
+// echo json_encode($youtube->getChannelLive('UCX6OQ3DkcsbYNE6H8uQQuVA'));
+// echo json_encode($youtube->getChannelCommunity('UCX6OQ3DkcsbYNE6H8uQQuVA'));
+// echo json_encode($youtube->getChannelAbout('UCX6OQ3DkcsbYNE6H8uQQuVA'));
 // echo json_encode($youtube->getChannelVideos('UC8aFE06Cti9OnQcKpl6rDvQ'));
 // echo json_encode($youtube->getChannelShorts('UC8aFE06Cti9OnQcKpl6rDvQ'));
 // echo json_encode($youtube->getChannelPlayList('UCX6OQ3DkcsbYNE6H8uQQuVA'));
