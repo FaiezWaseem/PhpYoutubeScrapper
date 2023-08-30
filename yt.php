@@ -740,7 +740,7 @@ class YT
             }
             if (isset($value["richSectionRenderer"])) {
                 $_shrtVideos = $this->arrayGet($value, 'richSectionRenderer.content.richShelfRenderer.contents');
-                $videoShorts = [...$videoShorts, ...$this->getShorts($_shrtVideos)];
+                 $videoShorts = array_merge($videoShorts , $this->getShorts($_shrtVideos));
             }
         }
         return [
