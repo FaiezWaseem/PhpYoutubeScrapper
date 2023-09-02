@@ -20,10 +20,13 @@ $yt->setCookie($cookie);
 
 
 
+if (isset($_GET["download"])) {
+    $vid_id = $_GET["download"];
+    echo response(200, 'ok', $yt->getDownloadURL($vid_id));
+}
 if (isset($_GET["videoInfo"])) {
     $vid_id = $_GET["videoInfo"];
-    $res = $yt->getVideo($vid_id);
-    return response(200, 'ok', $res);
+    echo response(200, 'ok', $yt->getVideo($vid_id));
 }
 if (isset($_GET["search_query"])) {
     $Query = $_GET["search_query"];
@@ -45,16 +48,20 @@ if (isset($_GET["channel_feature"])) {
     echo response(200, 'ok', $yt->getChannelFeatured($channelId));
 }
 if (isset($_GET["channel_live"])) {
-    $channelId = $_GET["channel_feature"];
+    $channelId = $_GET["channel_live"];
     echo response(200, 'ok', $yt->getChannelLive($channelId));
 }
 if (isset($_GET["channel_community"])) {
-    $channelId = $_GET["channel_feature"];
+    $channelId = $_GET["channel_community"];
     echo response(200, 'ok', $yt->getChannelCommunity($channelId));
 }
 if (isset($_GET["channel_videos"])) {
     $channelId = $_GET["channel_videos"];
     echo response(200, 'ok', $yt->getChannelVideos($channelId));
+}
+if (isset($_GET["channel_about"])) {
+    $channelId = $_GET["channel_about"];
+    echo response(200, 'ok', $yt->getChannelAbout($channelId));
 }
 if (isset($_GET["channel_shorts"])) {
     $channelId = $_GET["channel_shorts"];

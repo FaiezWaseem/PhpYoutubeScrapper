@@ -1,21 +1,41 @@
 # PHP BASED YT SCRAPPER
+ The one and only youtube scrapper that scraps literally everything of the youtube , just using php
+ no API key needed :) . Just Include the yt.php class and Enjoy!!.
+
+```Php
+
+    include_once("./yt.php");
+    $youtube = new YT(); 
+   // get Download Urls just like this 
+   // pass the video id
+   echo json_encode($youtube->getDownloadURL('1WEAJ-DFkHE'));
+
+```
 
 ### Features
-- [x]  GET HomePage Videos
-- [x]  GET Video Info + Video Related Recomended Videos
-- [x]  GET Video Playable links
-- [x]  GET Search Video + load more videos
-- [x]  GET Channel Meta Info
-- [x]  GET Channel Featured , Videos , Shorts  , Playlist , Community Post , Live , About
-- [x]  GET Video Comments
-- [x]  GET Comment Replys
-- [ ]  Like Video
-- [ ]  DisLike Video
-- [ ]  Notifications
+- [x]   Authentication
+- [x]   HomePage Videos
+- [x]   Video Details 
+- [x]   Video Related Recomended Videos
+- [x]   Video Playable/Download links
+- [x]   Search Videos + load more videos
+- [x]   Channel Meta Info
+- [x]   Channel Featured 
+- [x]   Channel Videos  
+- [x]   Channel Shorts
+- [x]   Channel Playlist
+- [x]   Channel Community Post
+- [x]   Channel  Live
+- [x]   Channel About
+- [x]   Video Comments
+- [x]   Comment Replys
+- [ ]   Like Video
+- [ ]   DisLike Video
+- [ ]   Notifications
 
 ## how to
  just download the yt.php , include it and enjoy!
- for example checkout the index.php or example2.php
+ for example checkout the index.php or example2.php. Sample Code 
 
 ```Php
     include_once("./yt.php");
@@ -50,7 +70,8 @@
   so here are the steps.
 
   - Step1
-   Open youtube.com with inspector open
+
+    Open youtube.com with inspector open
 
   - Step2 
 
@@ -96,10 +117,10 @@
 
 ### Todo
  - [ ]  load more videos [for methods like relatedvideos , channel Shorts ,videos , featured , community posts etc]
- - [ ]  video playable link speed increase
-
+ 
 
 ## progress log
   - Now You Will Get Yt Shorts from HomePage as Well as the chips (21-Aug-2023)
   - Now we Can Get LoggedIn User Profile Picture (21-Aug-2023)
   - Added Channel Community Post and Channel Live Videos, About [fixed Some Bugs] (27-Aug-2023)
+  - Video Download Speed Fixed , New Download Method Provide Fast Video URLS [Refractoring] (02-Sep-2023)

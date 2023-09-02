@@ -9,6 +9,7 @@ $youtube = new YT();
 // echo json_encode($youtube->HomePageVideos());
 // echo json_encode($youtube->getRelatedVideo('GlLRYml8mCY'));
 // echo json_encode($youtube->getVideo('1WEAJ-DFkHE'));
+// echo json_encode($youtube->getDownloadURL('1WEAJ-DFkHE'));
 // echo json_encode($youtube->getChannelFeatured('UCX6OQ3DkcsbYNE6H8uQQuVA'));
 // echo json_encode($youtube->getChannelLive('UCX6OQ3DkcsbYNE6H8uQQuVA'));
 // echo json_encode($youtube->getChannelCommunity('UCX6OQ3DkcsbYNE6H8uQQuVA'));

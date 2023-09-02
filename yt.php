@@ -66,48 +66,9 @@ class YT
      */
     public function HomePageVideosWithAuth()
     {
-        if ($this->authorization && $this->cookie) {
-            $_auth = $this->authorization;
-            $ck = $this->cookie;
-
-            $curl = curl_init();
-
-            curl_setopt_array($curl, [
-                CURLOPT_URL => "https://www.youtube.com/",
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => "",
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 30,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => "GET",
-                CURLOPT_HTTPHEADER => [
-                    "Accept: */*",
-                    "User-Agent: Thunder Client (https://www.thunderclient.com)",
-                    "authorization: $_auth",
-                    "cookie: $ck",
-                    "x-goog-authuser: 1",
-                    "x-goog-visitor-id: CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D",
-                    "x-origin: https://www.youtube.com",
-                    "x-youtube-client-name: 1",
-                    "x-youtube-client-version: 2.20230613.01.00"
-                ],
-            ]);
-
-            $response = curl_exec($curl);
-            $err = curl_error($curl);
-
-            curl_close($curl);
-
-            if ($err) {
-                echo "cURL Error #:" . $err;
-            } else {
-                $json = $this->getInitalData($response, 34);
-                // return $json;
-                return $this->parseHomePageVideos($json);
-            }
-        } else {
-            throw new ErrorException("User is ot Authorized");
-        }
+        $html = $this->get($this->base_url);
+        $json = $this->getInitalData($html, 34);
+        return $this->parseHomePageVideos($json);
     }
     public function HomePageVideosNext(string $continuationToken = null)
     {
@@ -177,6 +138,45 @@ class YT
         } else {
             throw new ErrorException("User is ot Authorized");
         }
+    }
+
+    /**
+     *  Much Faster than any other method
+     * @param string $videoId
+     */
+    public function getDownloadURL($videoId = null)
+    {
+        $html = $this->get('https://10downloader.com/download?v=http://www.youtube.com/watch?v=' . $videoId);
+        $doc = new DOMDocument();
+        @$doc->loadHTML($html);
+        $nodes = $this->getElementsByClassName($doc, 'downloadBtn', 'a');
+        return array(
+            [
+                'url' => $nodes[0]->getAttribute('href'),
+                'quality' => '720p',
+                'format' => 'mp4',
+                'sound' => true,
+            ],
+            [
+                'url' => $nodes[1]->getAttribute('href'),
+                'quality' => '360p',
+                'format' => 'mp4',
+                'sound' => true,
+            ],
+            [
+                'url' => $nodes[2]->getAttribute('href'),
+                'quality' => '144p',
+                'format' => '3gp',
+                'sound' => true,
+            ],
+            [
+                'url' => $nodes[26]->getAttribute('href'),
+                'quality' => '1080p50',
+                'format' => 'mp4',
+                'sound' => false,
+            ]
+        );
+
     }
     /**
      *  RETURNS A RESULT OF VIDEO ARRAY 
@@ -347,6 +347,23 @@ class YT
         return $response;
     }
 
+    protected function getElementsByClassName($dom, $ClassName, $tagName = null)
+    {
+        if ($tagName) {
+            $Elements = $dom->getElementsByTagName($tagName);
+        } else {
+            $Elements = $dom->getElementsByTagName("*");
+        }
+        $Matched = array();
+        for ($i = 0; $i < $Elements->length; $i++) {
+            if ($Elements->item($i)->attributes->getNamedItem('class')) {
+                if ($Elements->item($i)->attributes->getNamedItem('class')->nodeValue == $ClassName) {
+                    $Matched[] = $Elements->item($i);
+                }
+            }
+        }
+        return $Matched;
+    }
 
     protected function getParsedSearchResult($json)
     {
@@ -519,12 +536,49 @@ class YT
 
     protected function get($url = null)
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        curl_close($ch);
-        return $output;
+        if ($this->authorization && $this->cookie) {
+            $_auth = $this->authorization;
+            $ck = $this->cookie;
+            $curl = curl_init();
+            
+            curl_setopt_array($curl, [
+                CURLOPT_URL => $url,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => "",
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "GET",
+                CURLOPT_HTTPHEADER => [
+                    "Accept: */*",
+                    "User-Agent: Thunder Client (https://www.thunderclient.com)",
+                    "authorization: $_auth",
+                    "cookie: $ck",
+                    "x-goog-authuser: 1",
+                    "x-goog-visitor-id: CgtmZXN5X0VMZGwwSSi-jKykBg%3D%3D",
+                    "x-origin: https://www.youtube.com",
+                    "x-youtube-client-name: 1",
+                    "x-youtube-client-version: 2.20230613.01.00"
+                ],
+            ]);
+            
+            $response = curl_exec($curl);
+            $err = curl_error($curl);
+            
+            if ($err) {
+                return $err;
+            }
+            curl_close($curl);
+            return $response;
+        } else {
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            $output = curl_exec($ch);
+            curl_close($ch);
+            return $output;
+        }
     }
 
     protected function getParseChannelVideos($json, $page)
@@ -588,22 +642,27 @@ class YT
             'isValid' => false
         );
     }
-    protected function extractLink($_link = []){
-     $links =[];
-     foreach ($_link as $key => $value) {
-        array_push($links , array(
-            'link' => $value['channelExternalLinkViewModel']['link']['content'],
-            'title' => $value['channelExternalLinkViewModel']['title']['content'],
-        ));
-     }
-     return $links;
+    protected function extractLink($_link = [])
+    {
+        $links = [];
+        foreach ($_link as $key => $value) {
+            array_push(
+                $links,
+                array(
+                    'link' => $value['channelExternalLinkViewModel']['link']['content'],
+                    'title' => $value['channelExternalLinkViewModel']['title']['content'],
+                )
+            );
+        }
+        return $links;
     }
-    protected function getParsedChannelCommunity($_videos){
+    protected function getParsedChannelCommunity($_videos)
+    {
         $posts = array();
         $nextToken = null;
         foreach ($_videos as $key => $value) {
-             $post =  $value['backstagePostThreadRenderer']['post']['backstagePostRenderer'] ?? null;
-             if($post){
+            $post = $value['backstagePostThreadRenderer']['post']['backstagePostRenderer'] ?? null;
+            if ($post) {
                 $_post['postId'] = $post['postId'] ?? '';
                 $_post['Author'] = $post['authorText']['runs'][0]['text'] ?? '';
                 $_post['AuthorThumbnail'] = $post['authorThumbnail']['thumbnails'] ?? [];
@@ -612,11 +671,11 @@ class YT
                 $_post['publishedTime'] = $post['publishedTimeText']['runs'][0]['text'] ?? '';
                 $_post['voteCount'] = $post['voteCount']['simpleText'] ?? '';
                 $_post['replyCount'] = $post['actionButtons']['commentActionButtonsRenderer']['replyButton']['buttonRenderer']['text']['simpleText'] ?? '';
-                array_push($posts , $_post);
-             }else{
+                array_push($posts, $_post);
+            } else {
                 $nextToken = $value['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'];
-             }
-             
+            }
+
         }
         return array(
             'posts' => $posts,
@@ -740,7 +799,7 @@ class YT
             }
             if (isset($value["richSectionRenderer"])) {
                 $_shrtVideos = $this->arrayGet($value, 'richSectionRenderer.content.richShelfRenderer.contents');
-                 $videoShorts = array_merge($videoShorts , $this->getShorts($_shrtVideos));
+                $videoShorts = array_merge($videoShorts, $this->getShorts($_shrtVideos));
             }
         }
         return [
