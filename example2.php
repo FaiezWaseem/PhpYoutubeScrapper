@@ -59,6 +59,10 @@ if (isset($_GET["channel_videos"])) {
     $channelId = $_GET["channel_videos"];
     echo response(200, 'ok', $yt->getChannelVideos($channelId));
 }
+if (isset($_GET["channel_videos_next"])) {
+    $nextToken = $_GET["channel_videos_next"];
+    echo response(200, 'ok', $yt->getChannelVideosNext($nextToken));
+}
 if (isset($_GET["channel_about"])) {
     $channelId = $_GET["channel_about"];
     echo response(200, 'ok', $yt->getChannelAbout($channelId));

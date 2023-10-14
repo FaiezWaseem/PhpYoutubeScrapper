@@ -21,7 +21,7 @@
 - [x]   Search Videos + load more videos
 - [x]   Channel Meta Info
 - [x]   Channel Featured 
-- [x]   Channel Videos  
+- [x]   Channel Videos + Load more videos
 - [x]   Channel Shorts
 - [x]   Channel Playlist
 - [x]   Channel Community Post
@@ -102,11 +102,12 @@
      *          AUTHORIZATION
      * -----------------------------------
      */
+     include_once("./yt.php");
+
+       $youtube = new YT();      
        $env = parse_ini_file('.env');
-       $authorization = $env['AUTHORIZATION'];
-       $cookie = $env['COOKIE'];
-       $youtube->setAuthorization($authorization);
-       $youtube->setCookie($cookie);
+       $youtube->setAuthorization($env['AUTHORIZATION']);
+       $youtube->setCookie($env['COOKIE']);
     // ------------------------------------
 
       echo json_encode($youtube->HomePageVideosWithAuth());
@@ -116,7 +117,7 @@
 
 
 ### Todo
- - [ ]  load more videos [for methods like relatedvideos , channel Shorts ,videos , featured , community posts etc]
+ - [ ]  load more videos [for methods like relatedvideos , channel Shorts , community posts etc]
  
 
 ## progress log
@@ -124,3 +125,4 @@
   - Now we Can Get LoggedIn User Profile Picture (21-Aug-2023)
   - Added Channel Community Post and Channel Live Videos, About [fixed Some Bugs] (27-Aug-2023)
   - Video Download Speed Fixed , New Download Method Provide Fast Video URLS [Refractoring] (02-Sep-2023)
+  - Now you can load more Videos of Channel (14-Oct-2023)

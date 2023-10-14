@@ -179,6 +179,16 @@ class YT
 
     }
     /**
+     *  Get youtube short Video Detail
+     *  @param string $shortId
+     */
+    public function getShortDetails(string $shortId)
+    {
+        $html = $this->get('https://www.youtube.com/shorts/' . $shortId);
+        $json = $this->getPlayerResponse($html);
+        return $json['videoDetails'] ?? [];
+    }
+    /**
      *  RETURNS A RESULT OF VIDEO ARRAY 
      *  ON QUERY $query can be Php+Tutorial
      *  no space '+' sign instead of space
@@ -192,22 +202,23 @@ class YT
         $json = $this->getInitalData($html, 33);
         return $this->parseSearchResult($json);
     }
-    /*
-    pass a video Id it will return its related
-    videos Array
-    @param string $videoId
-    @return array
-    */
+    /**
+     * pass a video Id it will return its related
+     * videos Array
+     * @param string $videoId
+     * @return array
+     */
     public function getRelatedVideo($videoId)
     {
         $html = $this->get($this->base_url . $this->video_url . $videoId);
         $json = $this->getInitalData($html, 43);
         return $this->parserelatedVideoResult($json);
     }
-    /*
-    pass the channelId as String 
-    get an Array of Videos Object
-    */
+    /**
+     * pass the channelId as String 
+     * get an Array of Videos Object
+     * @param  string $channelId
+     */
     public function getChannelFeatured($channelId)
     {
         $html = $this->get($this->base_url . $this->channel . $channelId);
@@ -306,7 +317,7 @@ class YT
         return array(
             'video' => $video,
             'recomended' => $this->parserelatedVideoResult($json2),
-            'comment' => $this->getVideoCommentInfo($json2)
+            'comment' => $this->getVideoCommentInfo($json2),
         );
     }
     /*
@@ -345,6 +356,29 @@ class YT
         $search_url = "https://suggestqueries-clients6.youtube.com/complete/search?client=youtube&hl=en-gb&gl=pk&sugexp=uqap13niqtn222%2Cytpo.bo.me%3D1%2Cytposo.bo.me%3D1%2Cytpo.bo.ro.mi%3D24381100%2Cytposo.bo.ro.mi%3D24381100%2Ccfro%3D1%2Cytpo.bo.me%3D0%2Cytposo.bo.me%3D0%2Cytpo.bo.ro.mi%3D24372967%2Cytposo.bo.ro.mi%3D24372967&gs_rn=64&gs_ri=youtube&authuser=1&tok=jyC9ATTibQdWkrbg_vfP4Q&ds=yt&cp=4&gs_id=m&q=$query&callback=google.sbox.p50&gs_gbg=ab4h6fv1Rwx36vY6ocxqP6";
         $response = $this->get($search_url);
         return $response;
+    }
+    public function getChannelVideosNext($nextToken)
+    {
+        $res = $this->postNext($nextToken, 'browse');
+        $_videos = $res->onResponseReceivedActions[0]->appendContinuationItemsAction->continuationItems;
+        $videos = array();
+        foreach ($_videos as $key => $value) {
+            $_temp = $value->richItemRenderer->content->compactVideoRenderer ?? [];
+            if ($_temp) {
+                array_push(
+                    $videos,
+                    array(
+                        "videoId" => $_temp->videoId ?? '',
+                        "thumbnails" => $_temp->thumbnail->thumbnails ?? [],
+                        "title" => $_temp->title->runs[0]->text ?? '',
+                        "viewCount" => $_temp->viewCountText->runs[0]->text ?? '',
+                        "lengthText" => $_temp->lengthText->runs[0]->text ?? '',
+                    )
+                );
+            }
+        }
+        $token = $_videos[sizeof($_videos) - 1]->continuationItemRenderer->continuationEndpoint->continuationCommand->token;
+        return ['videos' => $videos, 'nextToken' => $token];
     }
 
     protected function getElementsByClassName($dom, $ClassName, $tagName = null)
@@ -540,7 +574,7 @@ class YT
             $_auth = $this->authorization;
             $ck = $this->cookie;
             $curl = curl_init();
-            
+
             curl_setopt_array($curl, [
                 CURLOPT_URL => $url,
                 CURLOPT_RETURNTRANSFER => true,
@@ -561,10 +595,10 @@ class YT
                     "x-youtube-client-version: 2.20230613.01.00"
                 ],
             ]);
-            
+
             $response = curl_exec($curl);
             $err = curl_error($curl);
-            
+
             if ($err) {
                 return $err;
             }
@@ -716,7 +750,8 @@ class YT
                 )
             );
         }
-        return $videos;
+        $token = $_videos[sizeof($_videos) - 1]['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'];
+        return ['videos' => $videos, 'nextToken' => $token];
     }
     protected function getParsedChannelVideos($_videos)
     {
@@ -734,7 +769,8 @@ class YT
                 )
             );
         }
-        return $videos;
+        $token = $_videos[sizeof($_videos) - 1]['continuationItemRenderer']['continuationEndpoint']['continuationCommand']['token'];
+        return ['videos' => $videos, 'nextToken' => $token];
     }
     protected function getParsedChannelFeatures($_videos)
     {
