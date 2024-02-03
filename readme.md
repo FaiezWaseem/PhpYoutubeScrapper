@@ -94,7 +94,7 @@
      COOKIE="VISITOR_INFO1_LIVE=fesy_ELdl0I; wide=0; YSCxxxx......"  
 ```
 
- <img  src="HowTogetAuth.PNG" >   
+ <img  src="./screenshots/HowTogetAuth.PNG" >   
 
  ```Php
  
