@@ -35,7 +35,8 @@
 
 ## how to
  just download the yt.php , include it and enjoy!
- for example checkout the index.php or example2.php. Sample Code 
+ for examples checkout the example folder
+ index.php or example2.php. Sample Code 
 
 ```Php
     include_once("./yt.php");
@@ -126,3 +127,4 @@
   - Added Channel Community Post and Channel Live Videos, About [fixed Some Bugs] (27-Aug-2023)
   - Video Download Speed Fixed , New Download Method Provide Fast Video URLS [Refractoring] (02-Sep-2023)
   - Now you can load more Videos of Channel (14-Oct-2023)
+  - a few minor php errors fixed (03-Feb-2024)

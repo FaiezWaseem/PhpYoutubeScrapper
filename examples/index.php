@@ -1,23 +1,23 @@
 <?php
 
-include_once("./yt.php");
+include_once("../yt.php");
 
 $youtube = new YT();
 
 
+// echo json_encode($youtube->HomePageVideos());
 // echo json_encode($youtube->getShortDetails("5R7X7FoAcwQ"));
 // echo json_encode($youtube->search("WordPress+Tutorail"));
-// echo json_encode($youtube->HomePageVideos());
 // echo json_encode($youtube->getRelatedVideo('GlLRYml8mCY'));
 // echo json_encode($youtube->getVideo('1WEAJ-DFkHE'));
 // echo json_encode($youtube->getDownloadURL('1WEAJ-DFkHE'));
 // echo json_encode($youtube->getChannelFeatured('UCX6OQ3DkcsbYNE6H8uQQuVA'));
-// echo json_encode($youtube->getChannelLive('UCX6OQ3DkcsbYNE6H8uQQuVA'));
+// echo json_encode($youtube->getChannelLive('UCX6OQ3DkcsbYNE6H8uQQuVA')); //[not sure if working]
 // echo json_encode($youtube->getChannelCommunity('UCX6OQ3DkcsbYNE6H8uQQuVA'));
-// echo json_encode($youtube->getChannelAbout('UCX6OQ3DkcsbYNE6H8uQQuVA'));
+// echo json_encode($youtube->getChannelAbout('UCX6OQ3DkcsbYNE6H8uQQuVA'));  // [not sure if working]
 // echo json_encode($youtube->getChannelVideos('UC8aFE06Cti9OnQcKpl6rDvQ'));
 // echo json_encode($youtube->getChannelShorts('UC8aFE06Cti9OnQcKpl6rDvQ'));
-// echo json_encode($youtube->getChannelPlayList('UCX6OQ3DkcsbYNE6H8uQQuVA'));
+// echo json_encode($youtube->getChannelPlayList('UCX6OQ3DkcsbYNE6H8uQQuVA')); // [not sure if working]
 // echo json_encode($youtube->getChannelMetaDetails('UC8aFE06Cti9OnQcKpl6rDvQ'));
 // echo json_encode($youtube->getComments('Eg0SC0dsTFJZbWw4bUNZGAYyJSIRIgtHbExSWW1sOG1DWTAAeAJCEGNvbW1lbnRzLXNlY3Rpb24%3D'));
 // echo json_encode($youtube->getReplyComments('Eg0SC0dsTFJZbWw4bUNZGAYygwEaUBIaVWd4WlJRVWtVNjI3YlBwYlZleDRBYUFCQWciAggAKhhVQ2VWTW5TU2hQX0l2aXdra250ODNjd3cyC0dsTFJZbWw4bUNZQAFICoIBAggBQi9jb21tZW50LXJlcGxpZXMtaXRlbS1VZ3haUlFVa1U2MjdiUHBiVmV4NEFhQUJBZw%3D%3D'));

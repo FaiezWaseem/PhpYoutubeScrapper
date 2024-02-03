@@ -360,8 +360,9 @@ class YT
     public function getChannelVideosNext($nextToken)
     {
         $res = $this->postNext($nextToken, 'browse');
-        $_videos = $res->onResponseReceivedActions[0]->appendContinuationItemsAction->continuationItems;
+        $_videos = $res->onResponseReceivedActions[0]->appendContinuationItemsAction->continuationItems ?? [];
         $videos = array();
+        if(!empty($_videos)) {
         foreach ($_videos as $key => $value) {
             $_temp = $value->richItemRenderer->content->compactVideoRenderer ?? [];
             if ($_temp) {
@@ -379,6 +380,9 @@ class YT
         }
         $token = $_videos[sizeof($_videos) - 1]->continuationItemRenderer->continuationEndpoint->continuationCommand->token;
         return ['videos' => $videos, 'nextToken' => $token];
+      }
+      return ['videos' => $videos, 'nextToken' => ''];
+       
     }
 
     protected function getElementsByClassName($dom, $ClassName, $tagName = null)
@@ -865,12 +869,16 @@ class YT
     protected function parseSearchResult($json)
     {
         $video_page_response = $json["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"];
-        $size = sizeof($video_page_response);
+        $size = 0;
+        if (is_array($video_page_response)) {
+            $size = sizeof($video_page_response);
+            // The variable is an array, you can proceed with further operations
+        }
         $nextToken = $video_page_response[$size - 1]["continuationItemRenderer"]["continuationEndpoint"]["continuationCommand"]["token"];
 
         $videosJson = $json["contents"]["twoColumnSearchResultsRenderer"]["primaryContents"]["sectionListRenderer"]["contents"][0]["itemSectionRenderer"]["contents"];
         $videos = [];
-        foreach ($videosJson as $value) {
+        foreach (@$videosJson as $value) {
 
             if (isset($value["videoRenderer"])) {
                 $_video = $value["videoRenderer"];

@@ -2,7 +2,7 @@
 header("Access-Control-Allow-Origin: *");
 error_reporting(E_ALL & ~E_DEPRECATED);
 error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
-include_once("./yt.php");
+include_once("../yt.php");
 $yt = new YT();
 
 
