@@ -128,3 +128,4 @@
   - Video Download Speed Fixed , New Download Method Provide Fast Video URLS [Refractoring] (02-Sep-2023)
   - Now you can load more Videos of Channel (14-Oct-2023)
   - a few minor php errors fixed (03-Feb-2024)
+  - fixed homepage video loading (04-Feb-2024)

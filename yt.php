@@ -33,6 +33,12 @@ class YT
     protected $COMMUNITY = 'community';
     protected $ABOUT = 'about';
 
+    // Just a testing function 
+    public function test(){
+        $html = file_get_contents('out.html');
+        $json = $this->getInitalData($html, 34);
+        return $this->parseHomePageVideos($json);
+    }
 
 
     public function setCookie(string $_ck)
@@ -558,7 +564,26 @@ class YT
         $Var_value = $nodes[$nodeIndex]->nodeValue;
         $res = rtrim(substr($Var_value, 20, strlen($Var_value)), ";");
         $json = json_decode($res, true);
-        return $json;
+        if($json != null){
+          return $json;
+        }
+    
+        // Iterate through the <script> elements
+        foreach ($nodes as $node) {
+            // Get the node value
+            $nodeValue = $node->nodeValue;
+    
+            // Check if the node value contains ytInitialData
+            if (strpos($nodeValue, 'ytInitialData') !== false) {
+             
+                $res = rtrim(substr($nodeValue, 20, strlen($nodeValue)), ";");
+                $json = json_decode($res, true);
+                return $json;
+            }
+        }
+    
+        // Return null if ytInitialData is not found
+        return null;
     }
     protected function getPlayerResponse($html)
     {
@@ -853,6 +878,7 @@ class YT
     protected function getShorts($shorts = [])
     {
         $parsedJSON = [];
+        if(!empty($shorts))
         foreach ($shorts as $value) {
             if (isset($value["richItemRenderer"]["content"]["reelItemRenderer"])) {
                 $_video = $this->arrayGet($value, 'richItemRenderer.content.reelItemRenderer');

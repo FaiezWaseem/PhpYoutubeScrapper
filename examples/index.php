@@ -4,7 +4,6 @@ include_once("../yt.php");
 
 $youtube = new YT();
 
-
 // echo json_encode($youtube->HomePageVideos());
 // echo json_encode($youtube->getShortDetails("5R7X7FoAcwQ"));
 // echo json_encode($youtube->search("WordPress+Tutorail"));
